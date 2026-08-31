@@ -19,6 +19,24 @@ CI (`.github/workflows/build.yml`) runs `npm ci && npm run build && npm test` �
 workflow as the source of truth for how this project is built if this document and it ever
 disagree.
 
+## Demo / repo page
+
+[`demo/index.html`](demo/index.html) is a plain, framework-free HTML page exercising every
+component and mechanism in this package — tokens, weight enforcement, all nine visual
+components, Escort/Reversal/Yield/Migration/Offer, affordance/interaction/life. It imports the
+library directly via `<script type="module">` from `./convey-web.js`/`./convey-web.css` (no
+bundler of its own), so it only works once those sit next to it — which is exactly what
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) does: build the library, copy
+`dist/convey-web.js`/`dist/convey-web.css` alongside a copy of `demo/index.html` as `index.html`,
+and deploy that directory to GitHub Pages on every push to `main` that touches `demo/`, `src/`,
+or the build config. Live at <https://hereliesaz.github.io/convey-web/> (requires the repo's
+Pages source set to "GitHub Actions" under Settings → Pages, a one-time manual step this
+workflow can't perform on its own).
+
+To preview `demo/index.html` locally: `npm run build`, then copy `dist/convey-web.js` and
+`dist/convey-web.css` next to it (or symlink) and serve the directory with any static file
+server — opening it via `file://` won't work, since module scripts require an HTTP origin.
+
 ## Module shape
 
 Mirrors `convey`'s own top-level package shape as closely as the platform allows — same names,

@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>convey-web — live demo</title>
+<meta name="description" content="convey-web: the Conveyance Manifesto as framework-agnostic Web Components. Live, interactive demo." />
+<link rel="stylesheet" href="./convey-web.css" />
+<style>
+  :root {
+    --primary: #7B56F8;
+    --on-primary: #FFFFFF;
+    --primary-container: #1B1050;
+    --on-primary-container: #C4AAFF;
+    --secondary: #00CBA9;
+    --on-secondary: #002820;
+    --secondary-container: #003D33;
+    --on-secondary-container: #6DF5D4;
+    --tertiary: #FF8B5E;
+    --on-tertiary: #FFFFFF;
+    --tertiary-container: #4A1800;
+    --error: #FF4D6A;
+    --on-error: #690025;
+    --error-container: #3B0013;
+    --warning: #FFAD42;
+    --on-warning: #3D2400;
+    --success: #34E89E;
+    --on-success: #003923;
+    --surface: #04040C;
+    --on-surface: #ECEDF5;
+    --surface-variant: #080818;
+    --on-surface-variant: #9899BC;
+    --surface-container: #0D0D22;
+    --surface-container-low: #08081A;
+    --surface-container-high: #131330;
+    --surface-container-highest: #1A1A40;
+    --outline: #3A3A5C;
+    --outline-variant: #1F1F3A;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { color-scheme: dark; }
+
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--on-surface);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--secondary); }
+
+  h1, h2, h3 { font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+
+  code, pre {
+    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  code {
+    background: var(--surface-container-high);
+    padding: 0.15em 0.45em;
+    border-radius: 6px;
+    font-size: 0.9em;
+  }
+
+  pre {
+    background: var(--surface-container);
+    border: 1px solid var(--outline-variant);
+    border-radius: 12px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  /* ── Layout ────────────────────────────────────────────────────────── */
+
+  header.hero {
+    padding: 96px 24px 72px;
+    text-align: center;
+    background:
+      radial-gradient(60% 50% at 50% 0%, rgba(123, 86, 248, 0.22), transparent 70%),
+      var(--surface);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--on-surface-variant);
+    margin-bottom: 20px;
+  }
+
+  .wordmark .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--secondary);
+    box-shadow: 0 0 0 4px rgba(0, 203, 169, 0.18);
+  }
+
+  header.hero h1 {
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    background: linear-gradient(135deg, #fff 0%, #C4AAFF 55%, #6DF5D4 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  header.hero p.tagline {
+    max-width: 620px;
+    margin: 18px auto 0;
+    color: var(--on-surface-variant);
+    font-size: 1.05rem;
+  }
+
+  .hero-actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    appearance: none;
+    border: none;
+    font: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 11px 22px;
+    border-radius: 999px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn.primary { background: var(--primary); color: var(--on-primary); }
+  .btn.ghost { background: var(--surface-container-high); color: var(--on-surface); }
+  .btn.ghost:hover { background: var(--surface-container-highest); }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 12px 24px;
+    background: rgba(4, 4, 12, 0.86);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--outline-variant);
+  }
+
+  nav.toc a {
+    white-space: nowrap;
+    color: var(--on-surface-variant);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 999px;
+  }
+
+  nav.toc a:hover { color: var(--on-surface); background: var(--surface-container-high); }
+
+  main { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  section.demo-section {
+    padding: 72px 0;
+    border-bottom: 1px solid var(--outline-variant);
+  }
+
+  section.demo-section:last-of-type { border-bottom: none; }
+
+  .section-head { margin-bottom: 28px; }
+
+  .section-head .kicker {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin-bottom: 8px;
+  }
+
+  .section-head h2 { font-size: 1.7rem; }
+
+  .section-head p {
+    color: var(--on-surface-variant);
+    max-width: 640px;
+    margin: 10px 0 0;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .demo-box {
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .demo-box .label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--on-surface-variant);
+    margin-bottom: 16px;
+  }
+
+  .demo-box .stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .demo-box .note {
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--on-surface-variant);
+  }
+
+  .log-line {
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--secondary);
+    min-height: 1.4em;
+  }
+
+  /* ── Tokens ────────────────────────────────────────────────────────── */
+
+  .swatch-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+  }
+
+  .swatch {
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .shape-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .shape-sample {
+    width: 64px;
+    height: 64px;
+    background: var(--primary);
+  }
+
+  .shape-sample-label {
+    text-align: center;
+    font-size: 11px;
+    color: var(--on-surface-variant);
+    margin-top: 6px;
+  }
+
+  /* ── Component-specific stage styling ─────────────────────────────── */
+
+  convey-avatar { --convey-avatar-size: 48px; }
+
+  .plain-btn {
+    appearance: none;
+    border: none;
+    background: var(--surface-container-highest);
+    color: var(--on-surface);
+    font: inherit;
+    font-weight: 600;
+    padding: 12px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+
+  .plain-btn.primary { background: var(--primary); color: var(--on-primary); }
+
+  .list-demo {
+    background: var(--surface-container);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  convey-list-item, convey-card {
+    background: var(--surface-container-high);
+  }
+
+  convey-list-item::part(row), convey-card::part(surface) {
+    color: var(--on-surface);
+  }
+
+  .avatar-circle {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+
+  .ripple-target {
+    position: relative;
+    width: 140px;
+    height: 64px;
+    border-radius: 14px;
+    background: var(--primary);
+    color: var(--on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .swipe-target {
+    width: 220px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--surface-container-highest);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--on-surface-variant);
+    touch-action: pan-y;
+    cursor: grab;
+  }
+
+  .life-tile {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .migration-stage {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    background: var(--surface-container);
+    border-radius: 14px;
+  }
+
+  .escort-stage {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .escort-stage input {
+    background: var(--surface-container-highest);
+    border: 1px solid var(--outline);
+    color: var(--on-surface);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font: inherit;
+  }
+
+  footer {
+    padding: 56px 24px 80px;
+    text-align: center;
+    color: var(--on-surface-variant);
+    font-size: 13px;
+  }
+
+  footer a { color: var(--on-surface-variant); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="wordmark"><span class="dot"></span> convey-web</span>
+  <h1>The Conveyance Manifesto,<br />as native Web Components.</h1>
+  <p class="tagline">
+    A framework-agnostic TypeScript port of <code>convey</code> — Compose Multiplatform's motion
+    grammar, visual-weight enforcement, and "replaces X" mechanisms, rebuilt on Custom Elements,
+    Shadow DOM, and the Web Animations API. No React, no build step required to use it.
+  </p>
+  <div class="hero-actions">
+    <a class="btn primary" href="https://github.com/HereLiesAz/convey-web">View on GitHub</a>
+    <a class="btn ghost" href="#tokens">Explore the demo ↓</a>
+  </div>
+</header>
+
+<nav class="toc">
+  <a href="#tokens">Tokens</a>
+  <a href="#weight">Weight</a>
+  <a href="#components">Components</a>
+  <a href="#mechanisms">Mechanisms</a>
+  <a href="#interaction">Interaction</a>
+  <a href="#life">Life</a>
+  <a href="#install">Install</a>
+</nav>
+
+<main>
+
+  <!-- ── Tokens ─────────────────────────────────────────────────────── -->
+  <section class="demo-section" id="tokens">
+    <div class="section-head">
+      <span class="kicker">Tokens</span>
+      <h2>Color and shape carry role, not decoration</h2>
+      <p>
+        <code>ConveyColor</code> is a reference palette — every value names a position in the
+        hierarchy, not an aesthetic choice. <code>ConveyShape</code> is a radius/chamfer scale a
+        component escalates or de-escalates along as its weight changes.
+      </p>
+    </div>
+    <div class="demo-box" style="margin-bottom: 16px;">
+      <div class="label">ConveyColor</div>
+      <div class="swatch-row">
+        <div class="swatch" style="background: var(--primary); color: var(--on-primary);">Primary</div>
+        <div class="swatch" style="background: var(--secondary); color: var(--on-secondary);">Secondary</div>
+        <div class="swatch" style="background: var(--tertiary); color: var(--on-tertiary);">Tertiary</div>
+        <div class="swatch" style="background: var(--error); color: var(--on-error);">Error</div>
+        <div class="swatch" style="background: var(--warning); color: var(--on-warning);">Warning</div>
+        <div class="swatch" style="background: var(--success); color: var(--on-success);">Success</div>
+      </div>
+    </div>
+    <div class="demo-box">
+      <div class="label">ConveyShape</div>
+      <div class="shape-row" id="shape-row"></div>
+    </div>
+  </section>
+
+  <!-- ── Weight ─────────────────────────────────────────────────────── -->
+  <section class="demo-section" id="weight">
+    <div class="section-head">
+      <span class="kicker">ConveyWeight</span>
+      <h2>Visual hierarchy the framework enforces</h2>
+      <p>
+        <code>&lt;convey-weight weight="hero"&gt;</code> registers into the nearest
+        <code>&lt;convey-system&gt;</code>. Two Heroes on one surface is a declared violation, not
+        a style preference — the registry throws when the rule is broken.
+      </p>
+    </div>
+    <convey-system>
+      <div class="demo-box">
+        <div class="label">One Hero, bounded Primaries, quiet Secondaries and Ghosts</div>
+        <div class="stage">
+          <convey-weight weight="hero"><button class="plain-btn primary">Hero</button></convey-weight>
+          <convey-weight weight="primary"><button class="plain-btn">Primary</button></convey-weight>
+          <convey-weight weight="secondary"><button class="plain-btn">Secondary</button></convey-weight>
+          <convey-weight weight="ghost"><button class="plain-btn" style="opacity:.5;">Ghost</button></convey-weight>
+        </div>
+        <div class="note">Adding a second <code>weight="hero"</code> inside this system throws a <code>ConveyViolationError</code> — try it in the console: <code>document.querySelector('convey-system').weightRegistry.register({}, 'hero')</code> after this page registers its own hero above.</div>
+      </div>
+    </convey-system>
+  </section>
+
+  <!-- ── Components ─────────────────────────────────────────────────── -->
+  <section class="demo-section" id="components">
+    <div class="section-head">
+      <span class="kicker">Components</span>
+      <h2>Every element demonstrates its own state</h2>
+      <p>
+        Selected/unselected, checked/unchecked, present/absent — each is a morph the same
+        element performs, not a swap between two elements.
+      </p>
+    </div>
+    <div class="card-grid">
+
+      <div class="demo-box">
+        <div class="label">convey-switch</div>
+        <div class="stage">
+          <convey-switch id="demo-switch"></convey-switch>
+        </div>
+        <div class="log-line" id="switch-log"></div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-chip</div>
+        <div class="stage" id="chip-stage">
+          <convey-chip selected>Design</convey-chip>
+          <convey-chip>Engineering</convey-chip>
+          <convey-chip>Motion</convey-chip>
+        </div>
+        <div class="note">Click a chip to select it.</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-badge</div>
+        <div class="stage">
+          <convey-badge id="demo-badge" count="3">
+            <button class="plain-btn">🔔 Inbox</button>
+          </convey-badge>
+        </div>
+        <div class="stage" style="margin-top: 8px;">
+          <button class="plain-btn" id="badge-inc">+1</button>
+          <button class="plain-btn" id="badge-clear">Clear</button>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-avatar</div>
+        <div class="stage">
+          <convey-avatar name="Ada Lovelace"></convey-avatar>
+          <convey-avatar name="Grace Hopper"></convey-avatar>
+          <convey-avatar name="Alan Turing"></convey-avatar>
+        </div>
+      </div>
+
+      <div class="demo-box" style="grid-column: 1 / -1;">
+        <div class="label">convey-top-bar / convey-card / convey-list-item</div>
+        <convey-system>
+          <convey-top-bar style="background: var(--surface-container-high); padding: 0 16px; display:flex; align-items:center; height: 56px; border-radius: 14px 14px 0 0; margin-bottom: -2px;">
+            <button slot="leading" class="plain-btn" style="padding:6px 10px;">☰</button>
+            <span slot="title" style="font-weight:700;">Inbox</span>
+            <button slot="actions" class="plain-btn" style="padding:6px 10px;">🔍</button>
+          </convey-top-bar>
+          <convey-card weight="primary" elevation="0px">
+            <convey-list-item weight="primary" clickable>
+              <span slot="leading" style="font-size: 20px;">📦</span>
+              <span slot="title">Shipment #4021</span>
+              <span slot="subtitle">Out for delivery — arrives today</span>
+              <span slot="trailing">→</span>
+            </convey-list-item>
+          </convey-card>
+        </convey-system>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-segmented-control</div>
+        <div class="stage">
+          <convey-segmented-control selected="week" id="seg" style="width: 100%;">
+            <button value="day">Day</button>
+            <button value="week">Week</button>
+            <button value="month">Month</button>
+          </convey-segmented-control>
+        </div>
+        <div class="log-line" id="seg-log"></div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-navigation-bar</div>
+        <div class="stage">
+          <convey-navigation-bar selected="home" id="navbar" style="width: 100%;">
+            <button value="home" style="background:none;border:none;color:inherit;font:inherit;padding:8px;">🏠<br />Home</button>
+            <button value="search" style="background:none;border:none;color:inherit;font:inherit;padding:8px;">🔍<br />Search</button>
+            <button value="profile" style="background:none;border:none;color:inherit;font:inherit;padding:8px;">👤<br />Profile</button>
+          </convey-navigation-bar>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Mechanisms ─────────────────────────────────────────────────── -->
+  <section class="demo-section" id="mechanisms">
+    <div class="section-head">
+      <span class="kicker">"Replaces X" mechanisms</span>
+      <h2>Escort, Reversal, Yield, Migration, Offer</h2>
+      <p>
+        Each of these replaces a conventional UI construct — disabled buttons, confirm dialogs,
+        spinners, empty-state illustrations — with one element that stays honest about what it's
+        doing, in place.
+      </p>
+    </div>
+    <div class="card-grid">
+
+      <div class="demo-box">
+        <div class="label">convey-escorted — replaces disabled buttons</div>
+        <convey-system>
+          <div class="escort-stage">
+            <convey-gate-location identity="email">
+              <input id="email-input" placeholder="you@example.com" />
+            </convey-gate-location>
+            <convey-escorted id="escorted-submit">
+              <button class="plain-btn primary">Submit</button>
+            </convey-escorted>
+          </div>
+        </convey-system>
+        <div class="note">Submit is gated on the email field being non-empty. Click it empty — it refuses and escorts you to the field instead of doing nothing.</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-reversal — replaces confirm dialogs</div>
+        <div id="reversal-list"></div>
+        <div class="note">Delete a message: it collapses to an "Undo" residue for 4s instead of a confirm dialog.</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-yield — replaces spinners</div>
+        <div class="stage">
+          <convey-yield id="demo-yield" state="idle">
+            <button class="plain-btn primary" id="yield-btn">Process</button>
+          </convey-yield>
+        </div>
+        <div class="note">The button itself fills and compresses while working — no separate spinner appears.</div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-migration — replaces empty-state illustrations</div>
+        <div class="migration-stage">
+          <convey-migration id="demo-migration" empty corner="bottom-end" full-size="72px" compact-size="52px" content-padding="14px">
+            <div slot="content" style="padding: 16px; display:flex; flex-direction: column; gap: 8px;" id="migration-items"></div>
+            <button class="plain-btn primary" id="migration-fab" slot="creation-control" style="width:100%;height:100%;border-radius:50%;font-size:24px;">+</button>
+          </convey-migration>
+        </div>
+        <div class="note">Empty: the "+" control sits centered, full-size. Add an item: it relocates to the corner and shrinks — permanently.</div>
+      </div>
+
+      <div class="demo-box" style="grid-column: 1 / -1;">
+        <div class="label">convey-offer — the framework's Act, offered</div>
+        <div class="stage">
+          <convey-offer id="demo-offer" purpose="Send the invoice" weight="primary" phase="invite">
+            <span slot="invite" style="padding: 10px 22px;">Send Invoice</span>
+            <span slot="progress" style="padding: 10px 22px;">Sending…</span>
+            <span slot="success" style="padding: 10px 22px;">✓ Sent</span>
+            <span slot="failure" style="padding: 10px 22px;">Retry</span>
+          </convey-offer>
+        </div>
+        <div class="note">One element renders Invite → Progress → Success — no separate spinner, no separate toast.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Interaction / Affordance ──────────────────────────────────── -->
+  <section class="demo-section" id="interaction">
+    <div class="section-head">
+      <span class="kicker">Affordance &amp; interaction</span>
+      <h2>Elements teach themselves, once</h2>
+      <p>
+        <code>ConveyAffordance</code> demonstrates how to use a control through movement, then
+        stops. <code>ConveyInteraction</code> makes touch feedback carry meaning: where, that, and
+        how much longer.
+      </p>
+    </div>
+    <div class="card-grid">
+
+      <div class="demo-box">
+        <div class="label">press-hint (reload the page to see it teach again)</div>
+        <div class="stage">
+          <convey-affordance kind="press-hint" delay="600">
+            <button class="plain-btn primary" style="width:64px;height:64px;border-radius:50%;font-size:22px;">+</button>
+          </convey-affordance>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">conveyRipple — teaches WHERE</div>
+        <div class="stage"><div class="ripple-target" id="ripple-target">Tap me</div></div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">conveyLongPress — teaches HOW MUCH LONGER</div>
+        <div class="stage"><div class="ripple-target" id="long-press-target" style="background: var(--tertiary); color: var(--on-tertiary);">Hold me</div></div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">conveySwipe — teaches THAT there's more</div>
+        <div class="stage"><div class="swipe-target" id="swipe-target">Drag me sideways →</div></div>
+        <div class="log-line" id="swipe-log"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Life ──────────────────────────────────────────────────────── -->
+  <section class="demo-section" id="life">
+    <div class="section-head">
+      <span class="kicker">ConveyLife</span>
+      <h2>Chrome that never looks inert</h2>
+      <p>
+        Unlike an affordance, <code>ConveyLife</code> never stops on its own — it reports that
+        the system is alive right now, for chrome that isn't teaching interactivity.
+      </p>
+    </div>
+    <div class="card-grid">
+      <div class="demo-box"><div class="label">Breathe</div><div class="stage"><div class="life-tile" id="life-breathe">●</div></div></div>
+      <div class="demo-box"><div class="label">Twinkle</div><div class="stage"><div class="life-tile" id="life-twinkle" style="background: var(--secondary);">✦</div></div></div>
+      <div class="demo-box"><div class="label">Wobble</div><div class="stage"><div class="life-tile" id="life-wobble" style="background: var(--error);">!</div></div></div>
+      <div class="demo-box">
+        <div class="label">Burst (one-shot)</div>
+        <div class="stage"><div class="life-tile" id="life-burst" style="background: var(--success); cursor:pointer;">🎉</div></div>
+        <div class="note">Click it.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Install ───────────────────────────────────────────────────── -->
+  <section class="demo-section" id="install">
+    <div class="section-head">
+      <span class="kicker">Get started</span>
+      <h2>Drop it into anything</h2>
+      <p>Vanilla HTML, React, Vue, Svelte — <code>convey-web</code> is plain Custom Elements underneath.</p>
+    </div>
+    <pre>npm install @hereliesaz/convey-web</pre>
+    <pre>import '@hereliesaz/convey-web/style.css'
+import { ConveyMotion, springToLinearEasing } from '@hereliesaz/convey-web'
+
+el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</pre>
+  </section>
+
+</main>
+
+<footer>
+  Built on the <a href="https://github.com/HereLiesAz/Conveyance">Conveyance Manifesto</a> ·
+  <a href="https://github.com/HereLiesAz/convey-web">convey-web on GitHub</a> ·
+  the Compose Multiplatform counterpart is <a href="https://github.com/HereLiesAz/conveyance-convey">convey</a>
+</footer>
+
+<script type="module">
+  import {
+    shapeScale,
+    ConveyReversalState,
+    ConveyGate,
+    conveyRipple,
+    conveyLongPress,
+    conveySwipe,
+    ConveyLife,
+    applyConveyLife,
+    triggerConveyLifeBurst,
+  } from './convey-web.js'
+
+  // ── Shapes ──────────────────────────────────────────────────────────
+  const shapeRow = document.getElementById('shape-row')
+  for (const token of shapeScale) {
+    const wrap = document.createElement('div')
+    const sample = document.createElement('div')
+    sample.className = 'shape-sample'
+    if (token.borderRadius) sample.style.borderRadius = token.borderRadius
+    if (token.clipPath) sample.style.clipPath = token.clipPath
+    const label = document.createElement('div')
+    label.className = 'shape-sample-label'
+    label.textContent = token.name
+    wrap.appendChild(sample)
+    wrap.appendChild(label)
+    shapeRow.appendChild(wrap)
+  }
+
+  // ── Switch ──────────────────────────────────────────────────────────
+  const demoSwitch = document.getElementById('demo-switch')
+  const switchLog = document.getElementById('switch-log')
+  demoSwitch.addEventListener('convey-change', (e) => {
+    demoSwitch.toggleAttribute('checked', e.detail.checked)
+    switchLog.textContent = `convey-change → checked: ${e.detail.checked}`
+  })
+
+  // ── Chips ───────────────────────────────────────────────────────────
+  document.getElementById('chip-stage').addEventListener('convey-click', () => {})
+  for (const chip of document.querySelectorAll('#chip-stage convey-chip')) {
+    chip.toggleAttribute('clickable', true)
+    chip.addEventListener('convey-click', () => {
+      for (const c of document.querySelectorAll('#chip-stage convey-chip')) c.removeAttribute('selected')
+      chip.setAttribute('selected', '')
+    })
+  }
+
+  // ── Badge ───────────────────────────────────────────────────────────
+  const demoBadge = document.getElementById('demo-badge')
+  document.getElementById('badge-inc').addEventListener('click', () => {
+    const current = Number.parseInt(demoBadge.getAttribute('count') ?? '0', 10)
+    demoBadge.setAttribute('count', String(current + 1))
+  })
+  document.getElementById('badge-clear').addEventListener('click', () => {
+    demoBadge.setAttribute('count', '0')
+  })
+
+  // ── Segmented control / nav bar ────────────────────────────────────
+  const seg = document.getElementById('seg')
+  const segLog = document.getElementById('seg-log')
+  seg.addEventListener('convey-select', (e) => {
+    seg.setAttribute('selected', e.detail.value)
+    segLog.textContent = `convey-select → ${e.detail.value}`
+  })
+  const navbar = document.getElementById('navbar')
+  navbar.addEventListener('convey-select', (e) => navbar.setAttribute('selected', e.detail.value))
+
+  // ── Escort ──────────────────────────────────────────────────────────
+  const emailInput = document.getElementById('email-input')
+  const escortedSubmit = document.getElementById('escorted-submit')
+  escortedSubmit.gate = new ConveyGate('email', () => emailInput.value.trim() !== '')
+  escortedSubmit.addEventListener('convey-click', () => {
+    emailInput.value = ''
+  })
+
+  // ── Reversal ────────────────────────────────────────────────────────
+  const messages = [
+    { id: 1, text: 'Quarterly report attached' },
+    { id: 2, text: 'Lunch tomorrow?' },
+    { id: 3, text: 'Server maintenance window' },
+  ]
+  const reversalState = new ConveyReversalState(messages)
+  const reversalList = document.getElementById('reversal-list')
+
+  function renderReversalList() {
+    reversalList.innerHTML = ''
+    for (const item of reversalState.items) {
+      const el = document.createElement('convey-reversal')
+      el.item = item
+      el.state = reversalState
+      el.style.marginBottom = '6px'
+      const row = document.createElement('div')
+      row.slot = 'content'
+      row.style.cssText =
+        'display:flex; align-items:center; justify-content:space-between; padding:10px 12px; background:var(--surface-container-high); border-radius:10px;'
+      const label = document.createElement('span')
+      label.textContent = item.text
+      const del = document.createElement('button')
+      del.className = 'plain-btn'
+      del.style.cssText = 'padding:6px 12px; font-size:12px;'
+      del.textContent = 'Delete'
+      del.addEventListener('click', () => reversalState.destroy(item))
+      row.appendChild(label)
+      row.appendChild(del)
+      el.appendChild(row)
+      reversalList.appendChild(el)
+    }
+  }
+  reversalState.onChange(() => {
+    if (reversalState.items.length !== reversalList.childElementCount) renderReversalList()
+  })
+  renderReversalList()
+
+  // ── Yield ───────────────────────────────────────────────────────────
+  const demoYield = document.getElementById('demo-yield')
+  document.getElementById('yield-btn').addEventListener('click', async () => {
+    demoYield.setAttribute('state', 'indeterminate')
+    await new Promise((r) => setTimeout(r, 1600))
+    demoYield.setAttribute('state', 'idle')
+  })
+
+  // ── Migration ───────────────────────────────────────────────────────
+  const migration = document.getElementById('demo-migration')
+  const migrationItems = document.getElementById('migration-items')
+  let migrationCount = 0
+  document.getElementById('migration-fab').addEventListener('click', () => {
+    migrationCount += 1
+    const row = document.createElement('div')
+    row.style.cssText = 'padding:8px 12px; background:var(--surface-container-high); border-radius:8px; font-size:13px;'
+    row.textContent = `Note ${migrationCount}`
+    migrationItems.appendChild(row)
+    migration.removeAttribute('empty')
+  })
+
+  // ── Offer ───────────────────────────────────────────────────────────
+  const offer = document.getElementById('demo-offer')
+  offer.addEventListener('convey-invoke', async () => {
+    offer.setAttribute('phase', 'progress')
+    await new Promise((r) => setTimeout(r, 1200))
+    offer.setAttribute('phase', 'success')
+    setTimeout(() => offer.setAttribute('phase', 'invite'), 1800)
+  })
+
+  // ── Interaction ─────────────────────────────────────────────────────
+  conveyRipple(document.getElementById('ripple-target'))
+  conveyLongPress(document.getElementById('long-press-target'), {
+    durationMs: 900,
+    onLongPress: () => {
+      const el = document.getElementById('long-press-target')
+      const original = el.textContent
+      el.textContent = 'Held!'
+      setTimeout(() => (el.textContent = original), 900)
+    },
+  })
+  const swipeLog = document.getElementById('swipe-log')
+  conveySwipe(document.getElementById('swipe-target'), {
+    onSwipe: (direction) => {
+      swipeLog.textContent = `Swiped ${direction}`
+    },
+  })
+
+  // ── Life ────────────────────────────────────────────────────────────
+  applyConveyLife(document.getElementById('life-breathe'), ConveyLife.Breathe())
+  applyConveyLife(document.getElementById('life-twinkle'), ConveyLife.Twinkle())
+  applyConveyLife(document.getElementById('life-wobble'), ConveyLife.Wobble())
+  const burstTile = document.getElementById('life-burst')
+  burstTile.addEventListener('click', () => triggerConveyLifeBurst(burstTile))
+</script>
+
+</body>
+</html>

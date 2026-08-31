@@ -6,6 +6,10 @@ The web-native counterpart to [`convey`](https://github.com/HereLiesAz/convey) (
 Multiplatform) — same vocabulary, same enforcement rules, framework-agnostic Web Components
 instead of Compose composables.
 
+**[Live demo →](https://hereliesaz.github.io/convey-web/)** — every component and mechanism in
+this package, running and interactive, built by [`.github/workflows/pages.yml`](.github/workflows/pages.yml)
+from [`demo/index.html`](demo/index.html).
+
 ```ts
 import { ConveyGrammar, ConveyWeightRegistry } from '@hereliesaz/convey-web'
 
