@@ -58,6 +58,16 @@ export {
   nearestOriginRegistry,
 } from './enter.js'
 
+export {
+  ConveyEmploymentRegistry,
+  ConveyEmploymentElement,
+  provideEmploymentRegistry,
+  nearestEmploymentRegistry,
+} from './employment.js'
+export type { ConveyJob } from './employment.js'
+
+export { ConveyPracticeRegistry, conveyPracticeDecay, decayed } from './practice.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
