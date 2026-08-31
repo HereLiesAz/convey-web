@@ -7,6 +7,7 @@ export {
   estimatedDurationMs,
   springToLinearEasing,
   toCss,
+  safeAnimate,
 } from './tokens/motion.js'
 export type { AnimationSpec, SpringSpec, TweenSpec, SnapSpec } from './tokens/motion.js'
 
@@ -29,3 +30,7 @@ export { ConveyGrammar, ConveyGrammarBuilder, buildConveyGrammar } from './gramm
 export type { GrammarEntry } from './grammar.js'
 
 export { ConveySystemElement, grammarOf } from './system.js'
+
+export { ConveyBadgeElement } from './components/badge.js'
+export { ConveyChipElement } from './components/chip.js'
+export { ConveySwitchElement } from './components/switch.js'

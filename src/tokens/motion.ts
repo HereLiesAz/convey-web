@@ -242,3 +242,25 @@ export function toCss(specValue: AnimationSpec): { durationMs: number; easing: s
       return { durationMs: 0, easing: 'step-end' }
   }
 }
+
+/**
+ * `Element.animate()` (Web Animations API) — jsdom (and so any Vitest/Jest test environment
+ * using it) doesn't implement it, and it's absent on some older engines still in the wild.
+ * Every component in this package animates through this helper rather than calling
+ * `el.animate()` directly: when WAAPI is unavailable, it applies the final keyframe's
+ * properties as inline styles immediately (a hard cut to the end state, not a crash) instead
+ * of throwing `TypeError: el.animate is not a function`. When WAAPI *is* available, this is a
+ * plain passthrough — same `Animation` object, same `.finished` promise, no behavior change.
+ */
+export function safeAnimate(
+  el: Element,
+  keyframes: Keyframe[],
+  options: KeyframeAnimationOptions,
+): Animation | undefined {
+  if (typeof (el as HTMLElement).animate !== 'function') {
+    const last = keyframes[keyframes.length - 1]
+    if (last) Object.assign((el as HTMLElement).style, last)
+    return undefined
+  }
+  return (el as HTMLElement).animate(keyframes, options)
+}
