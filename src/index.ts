@@ -68,6 +68,9 @@ export type { ConveyJob } from './employment.js'
 
 export { ConveyPracticeRegistry, conveyPracticeDecay, decayed } from './practice.js'
 
+export { ConveyAffordance, applyConveyAffordance, ConveyAffordanceElement, conveyInert } from './affordance.js'
+export type { ConveyAffordanceKind, ConveyAffordanceHandle } from './affordance.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
