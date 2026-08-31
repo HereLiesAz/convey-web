@@ -83,6 +83,8 @@ export {
 } from './transform.js'
 export type { ConveyTransformHandle } from './transform.js'
 
+export { ConveyMorphController } from './morph.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
