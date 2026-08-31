@@ -1,0 +1,14 @@
+/**
+ * Base stylesheet for convey-web's custom elements. Import via the package's
+ * `./style.css` export:
+ *
+ *   import '@hereliesaz/convey-web/style.css'
+ *
+ * Component-specific styles ship alongside each component as they're added; this file
+ * holds only what every consumer needs regardless of which components they use.
+ */
+
+convey-weight,
+convey-system {
+  display: contents;
+}

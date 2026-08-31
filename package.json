@@ -1,0 +1,36 @@
+{
+  "name": "@hereliesaz/convey-web",
+  "version": "0.1.0",
+  "description": "A CSS/TypeScript design system built on the Conveyance Manifesto — the web-native counterpart to convey (Compose Multiplatform), sharing the same vocabulary as framework-agnostic Web Components.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HereLiesAz/convey-web"
+  },
+  "main": "./dist/convey-web.js",
+  "module": "./dist/convey-web.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/convey-web.js"
+    },
+    "./style.css": "./dist/convey-web.css"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit && vite build",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vite": "^7.1.12",
+    "vite-plugin-dts": "^4.4.0",
+    "vitest": "^3.2.4",
+    "jsdom": "^25.0.1"
+  }
+}
