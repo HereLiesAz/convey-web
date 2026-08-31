@@ -126,14 +126,41 @@ Plus two enforcement/audit primitives from convey's top-level package:
   `staticCompositionLocalOf { ConveyEmploymentRegistry() }`'s own per-reader default.
 - `practice.ts` — `ConveyPracticeRegistry`/`conveyPracticeDecay`/`decayed`: §6.3 practice-decay —
   an element's recorded operation count decays a motion's ceremony (a tween shortens, a spring
-  stiffens) toward a floor, never fully removing it. **Not ported:** `conveyPracticedAffordance`
-  — it depends on `ConveyAffordance` (self-revealing interactivity), which has no web port yet.
+  stiffens) toward a floor, never fully removing it.
 
-Two real jsdom-vs-real-browser gaps were found and fixed while writing these mechanisms' tests,
-both guarded the same way `safeAnimate()` guards `Element.animate()`: `scrollIntoView()` isn't
-implemented in jsdom either (`escort.ts` feature-detects it), and setting `.style.width = '0'`
-round-trips as `'0px'` per the CSSOM spec's own serialization (not a bug — `yield.ts` just sets
-`'0px'` directly rather than relying on the implicit normalization).
+And the remaining supporting primitives, completing `convey`'s enforcement/motion vocabulary:
+
+- `affordance.ts` — `ConveyAffordance`/`applyConveyAffordance`/`<convey-affordance>`:
+  self-revealing interactivity — an element teaches its own interactivity once through movement
+  (press-hint, swipe-hint, drag-hint, expand-hint), then stops. `conveyPracticedAffordance`
+  (Kotlin's practice-gated affordance) lives in `practice.ts` since it also needs
+  `ConveyPracticeRegistry`: once `key` has recorded an operation, the Tell has already taught its
+  lesson and is silently replaced with `ConveyAffordance.None`.
+- `interaction.ts` — `conveyRipple`/`conveyPress`/`conveyLongPress`/`conveySwipe`: the interaction
+  layer — ripple teaches WHERE a touch registered, press-scale teaches THAT it was received,
+  long-press's SVG progress ring teaches HOW MUCH LONGER to hold, swipe resistance teaches THAT
+  there's content beyond the edge.
+- `transform.ts` — `conveyScaleOnPress`/`conveyLiftOnHover`/`conveyRotateOnHover`/`conveyScaleIn`/
+  `conveySlideIn`: the five named transforms, each attached to an existing element (no Modifier
+  chain on the web to compose several through the way `Modifier.conveyTransform { }`'s DSL does).
+- `morph.ts` — `ConveyMorphController`: persistent visual identity across state changes — one
+  element demonstrating its full range rather than old content vanishing and new content
+  appearing. Uses CSS's own native `border-radius`/`clip-path` interpolation rather than the
+  Kotlin original's from-scratch path-sampling engine — see the class doc for exactly which shape
+  pairs that covers and which it doesn't.
+- `life.ts` — `ConveyLife`/`applyConveyLife`/`triggerConveyLifeBurst`: continuous idle motion
+  (Breathe/Twinkle/Wobble) for chrome that should never look inert, distinct from
+  `ConveyAffordance` (teaches once, then stops) — `ConveyLife` never stops on its own.
+
+Several real jsdom-vs-real-browser gaps were found and fixed while writing these mechanisms'
+tests, all guarded the same way `safeAnimate()` guards `Element.animate()`: `scrollIntoView()`
+isn't implemented in jsdom either (`escort.ts` feature-detects it); neither is pointer capture
+(`interaction.ts`'s `conveySwipe`); jsdom has no global `PointerEvent` constructor at all (a
+test-infrastructure gap only — production code only listens for pointer events, never
+constructs one); `getComputedStyle(el).position` returns `''` rather than the real default
+`'static'` for an unset position (`interaction.ts`'s hover-lift/long-press ring positioning
+guards against both); and setting `.style.width = '0'` round-trips as `'0px'` per the CSSOM
+spec's own serialization (not a bug — `yield.ts` just sets `'0px'` directly).
 
 ## A real platform difference from Compose, found while testing this
 
@@ -150,17 +177,14 @@ stack. Documented directly on `ConveyWeightRegistry.register()`.
 
 **Built, tested:** the full tokens/grammar/weight enforcement layer, every component from
 `convey`'s first concrete-visual-component batch (the same 9 listed in `convey/AGENTS.md`), all
-six framework-named "Replaces X" mechanisms (Escort/Reversal/Yield/Migration/Offer/Enter), and
-Employment (Law 4)/Practice-decay (§6.3) enforcement — 126 tests, `npm run build` and `npm test`
-both pass clean, 0 `npm audit` vulnerabilities.
+six framework-named "Replaces X" mechanisms (Escort/Reversal/Yield/Migration/Offer/Enter),
+Employment (Law 4)/Practice-decay (§6.3) enforcement, and the remaining supporting primitives —
+`ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`, `ConveyMorph`, `ConveyLife` — 177
+tests, `npm run build` and `npm test` both pass clean, 0 `npm audit` vulnerabilities.
 
-**Not yet done:** `ConveyAffordance` (self-revealing interactivity), `ConveyInteraction`
-(ripple/press/long-press/swipe), `ConveyTransform` (scale/lift/rotate/slide), `ConveyMorph`
-(persistent-identity shape/color morphing), `ConveyLife` (continuous idle motion), and the
-WordNet/VerbNet-backed kinetic typography layer (`ConveyVerb`/`ConveyNoun`/`ConveyKineticText`/
-`ConveySvoScene`) — that last one is a large, genuinely separate undertaking (real linguistic
+**Not yet done:** the WordNet/VerbNet-backed kinetic typography layer (`ConveyVerb`/`ConveyNoun`/
+`ConveyKineticText`/`ConveySvoScene`) — a large, genuinely separate undertaking (real linguistic
 data and a from-scratch 2D force-physics port, not just a UI port) and hasn't been started.
-Being added incrementally, same cadence as `convey` itself was built.
 
 ## License
 

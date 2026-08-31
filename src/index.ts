@@ -66,7 +66,7 @@ export {
 } from './employment.js'
 export type { ConveyJob } from './employment.js'
 
-export { ConveyPracticeRegistry, conveyPracticeDecay, decayed } from './practice.js'
+export { ConveyPracticeRegistry, conveyPracticeDecay, decayed, conveyPracticedAffordance } from './practice.js'
 
 export { ConveyAffordance, applyConveyAffordance, ConveyAffordanceElement, conveyInert } from './affordance.js'
 export type { ConveyAffordanceKind, ConveyAffordanceHandle } from './affordance.js'

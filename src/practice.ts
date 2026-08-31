@@ -1,4 +1,6 @@
 import type { AnimationSpec, SpringSpec, TweenSpec } from './tokens/motion.js'
+import { applyConveyAffordance, ConveyAffordance, type ConveyAffordanceHandle, type ConveyAffordanceKind } from './affordance.js'
+import { ConveyGrammar } from './grammar.js'
 
 /**
  * Practice-decay (§6.3): "The person who has seen it four thousand times wants speed, not
@@ -16,9 +18,10 @@ import type { AnimationSpec, SpringSpec, TweenSpec } from './tokens/motion.js'
  * is a real product decision this package does not make for you — `seed()` a key's count from
  * your own persistence layer (e.g. `localStorage`) if you want that.
  *
- * Not ported: `conveyPracticedAffordance` (Kotlin's practice-gated `Modifier.conveyAffordance`)
- * — it depends on `ConveyAffordance`, self-revealing-interactivity, which has no web port yet.
- * Documented here rather than silently omitted; add it once `ConveyAffordance` itself exists.
+ * Also here: `conveyPracticedAffordance`, the practice-gated web port of Kotlin's
+ * `Modifier.conveyPracticedAffordance` — once `key` has recorded an operation, the Tell has
+ * already taught its lesson once, so it's silently replaced with `ConveyAffordance.None` before
+ * being applied. Teaching it again is not compassion, it's noise.
  */
 export class ConveyPracticeRegistry {
   private readonly counts = new Map<unknown, number>()
@@ -90,4 +93,23 @@ export function decayed(
     default:
       return spec
   }
+}
+
+/**
+ * Applies `affordance` to `el`, but only if `key` has never recorded an operation in `registry`
+ * — the web port of Kotlin's `Modifier.conveyPracticedAffordance`. Once the person has done the
+ * thing for real (`registry.recordOperation(key)` called from your click handler), the Tell has
+ * done its job; further reminders read as noise, not compassion, so this substitutes
+ * `ConveyAffordance.None` instead.
+ */
+export function conveyPracticedAffordance(
+  el: HTMLElement,
+  key: unknown,
+  affordance: ConveyAffordanceKind,
+  registry: ConveyPracticeRegistry,
+  grammar: ConveyGrammar = ConveyGrammar.Default,
+): ConveyAffordanceHandle {
+  const practiced = registry.operationCount(key) > 0
+  const effectiveAffordance = practiced ? ConveyAffordance.None : affordance
+  return applyConveyAffordance(el, effectiveAffordance, grammar)
 }

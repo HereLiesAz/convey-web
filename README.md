@@ -59,13 +59,14 @@ component batch — `<convey-avatar>`, `<convey-badge>`, `<convey-card>`, `<conv
 `<convey-list-item>`, `<convey-navigation-bar>`, `<convey-segmented-control>`,
 `<convey-switch>`, `<convey-top-bar>`; all six framework-named "Replaces X" mechanisms —
 `<convey-escorted>`, `<convey-reversal>`, `<convey-yield>`, `<convey-migration>`,
-`<convey-offer>`, `<convey-enter>`; and Employment (Law 4)/Practice-decay (§6.3) enforcement.
-All ported bit-for-bit from `convey`'s own Kotlin source. 126 tests, 0 `npm audit`
-vulnerabilities.
+`<convey-offer>`, `<convey-enter>`; Employment (Law 4)/Practice-decay (§6.3) enforcement; and the
+remaining supporting primitives — `ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`,
+`ConveyMorph`, `ConveyLife`. All ported bit-for-bit from `convey`'s own Kotlin source. 177 tests,
+0 `npm audit` vulnerabilities.
 
-**Not yet done:** `ConveyAffordance`/`ConveyInteraction`/`ConveyTransform`/`ConveyMorph`/
-`ConveyLife`, and the WordNet/VerbNet-backed kinetic typography layer. Being added
-incrementally — see [AGENTS.md](AGENTS.md) for the honest current-state accounting.
+**Not yet done:** the WordNet/VerbNet-backed kinetic typography layer
+(`ConveyVerb`/`ConveyNoun`/`ConveyKineticText`/`ConveySvoScene`) — see
+[AGENTS.md](AGENTS.md) for the honest current-state accounting.
 
 ## License
 

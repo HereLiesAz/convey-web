@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { ConveyPracticeRegistry, conveyPracticeDecay, decayed } from '../src/practice.js'
+import { ConveyPracticeRegistry, conveyPracticeDecay, decayed, conveyPracticedAffordance } from '../src/practice.js'
+import { ConveyAffordance } from '../src/affordance.js'
 
 describe('ConveyPracticeRegistry', () => {
   it('starts every key at zero operations', () => {
@@ -90,5 +91,32 @@ describe('decayed', () => {
       stiffness: 380,
       dampingRatio: 0.8,
     })
+  })
+})
+
+describe('conveyPracticedAffordance', () => {
+  it('applies the real affordance when the key has never operated', () => {
+    const el = document.createElement('div')
+    const registry = new ConveyPracticeRegistry()
+    const handle = conveyPracticedAffordance(el, 'button-a', ConveyAffordance.PressHint(), registry)
+    expect(() => handle.stop()).not.toThrow()
+  })
+
+  it('substitutes None once the key has recorded an operation', () => {
+    const el = document.createElement('div')
+    const registry = new ConveyPracticeRegistry()
+    registry.recordOperation('button-a')
+    const handle = conveyPracticedAffordance(el, 'button-a', ConveyAffordance.PressHint(), registry)
+    // None is a no-op: stop() should not throw and should leave no transform applied.
+    expect(() => handle.stop()).not.toThrow()
+    expect(el.style.transform).toBe('')
+  })
+
+  it('does not affect other keys in the same registry', () => {
+    const el = document.createElement('div')
+    const registry = new ConveyPracticeRegistry()
+    registry.recordOperation('button-a')
+    const handle = conveyPracticedAffordance(el, 'button-b', ConveyAffordance.PressHint(), registry)
+    expect(() => handle.stop()).not.toThrow()
   })
 })
