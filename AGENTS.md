@@ -88,6 +88,53 @@ Every animated component routes through `safeAnimate()` (`tokens/motion.ts`) rat
 jsdom, so any Vitest/Jest-based consumer test would otherwise crash on mount. `safeAnimate()`
 applies the final keyframe as inline styles when WAAPI is unavailable instead of throwing.
 
+The six framework-named "Replaces X" mechanisms, all ported from `convey`'s own `foundation/`
+sources:
+
+- `escort.ts` — `ConveyGate`/`ConveyEscortRegistry`/`<convey-gate-location>`/`<convey-escorted>`:
+  a blocked control performs a Refuse shake, then scrolls/focuses to its gate's registered
+  location, instead of doing nothing or looking disabled.
+- `reversal.ts` — `ConveyReversalState`/`<convey-reversal>`: a destroyed item collapses to a
+  compact, clickable "undo" residue in place for a configurable window, instead of a confirm
+  dialog or a toast that steals space and leaves.
+- `yield.ts` — `<convey-yield state="idle|determinate|indeterminate">`: the engaged element
+  deforms under load (a proportional or rhythmic fill overlay, plus compression) instead of a
+  separate spinner/progress-bar object appearing beside it. The indeterminate loop is a plain
+  WAAPI keyframe animation (`iterations: Infinity`, `direction: 'alternate'`) — no manual loop.
+- `migration.ts` — `<convey-migration empty corner="bottom-end">`: an empty collection's creation
+  control sits full-size and centered, then relocates to its permanent corner and shrinks on
+  first use, instead of an empty-state illustration and paragraph. Ports `BiasAlignment`'s own
+  math directly as CSS percentages.
+- `offer.ts` — `<convey-offer phase="invite|progress|success|failure|interrupted">`: composes
+  gate-blocked invocation, interruptible progress, and all five phases rendering from one
+  element via named slots, into the one thing product code actually reaches for. Implements the
+  behavior directly rather than first porting `ConveyStateHost`/`ConveyConstruct` as separate
+  primitives — those exist in Kotlin mainly for internal code reuse.
+- `enter.ts` — `<convey-origin key="...">`/`<convey-enter key="...">`: Law 2 continuity for
+  navigation — a destination grows from the origin element's last recorded bounds (a scale/
+  translate transform), instead of appearing from nowhere. Same honest caveat as the Kotlin
+  original: not visually verified against a real display in this environment.
+
+Plus two enforcement/audit primitives from convey's top-level package:
+
+- `employment.ts` — `ConveyJob`/`ConveyEmploymentRegistry`/`<convey-employment>`: Law 4 — every
+  element does at least `minimumJobs` (default 4) declared jobs, or is honestly `ambient`
+  (budgeted per surface). Faithfully reproduces a real asymmetry from the Kotlin original:
+  unlike `ConveyWeightRegistry`, `<convey-system>` does *not* provide a default
+  `ConveyEmploymentRegistry` — an unprovided `<convey-employment>` gets its own fresh, unshared
+  registry rather than one shared with siblings, matching
+  `staticCompositionLocalOf { ConveyEmploymentRegistry() }`'s own per-reader default.
+- `practice.ts` — `ConveyPracticeRegistry`/`conveyPracticeDecay`/`decayed`: §6.3 practice-decay —
+  an element's recorded operation count decays a motion's ceremony (a tween shortens, a spring
+  stiffens) toward a floor, never fully removing it. **Not ported:** `conveyPracticedAffordance`
+  — it depends on `ConveyAffordance` (self-revealing interactivity), which has no web port yet.
+
+Two real jsdom-vs-real-browser gaps were found and fixed while writing these mechanisms' tests,
+both guarded the same way `safeAnimate()` guards `Element.animate()`: `scrollIntoView()` isn't
+implemented in jsdom either (`escort.ts` feature-detects it), and setting `.style.width = '0'`
+round-trips as `'0px'` per the CSSOM spec's own serialization (not a bug — `yield.ts` just sets
+`'0px'` directly rather than relying on the implicit normalization).
+
 ## A real platform difference from Compose, found while testing this
 
 Per the WHATWG custom elements spec, an exception thrown inside a reaction callback
@@ -101,15 +148,19 @@ stack. Documented directly on `ConveyWeightRegistry.register()`.
 
 ## What's actually here today
 
-**Built, tested:** the full tokens/grammar/weight enforcement layer, plus every component from
-`convey`'s first concrete-visual-component batch (the same 9 listed in `convey/AGENTS.md`) — 51
-tests, `npm run build` and `npm test` both pass clean, 0 `npm audit` vulnerabilities.
+**Built, tested:** the full tokens/grammar/weight enforcement layer, every component from
+`convey`'s first concrete-visual-component batch (the same 9 listed in `convey/AGENTS.md`), all
+six framework-named "Replaces X" mechanisms (Escort/Reversal/Yield/Migration/Offer/Enter), and
+Employment (Law 4)/Practice-decay (§6.3) enforcement — 126 tests, `npm run build` and `npm test`
+both pass clean, 0 `npm audit` vulnerabilities.
 
-**Not yet done:** the framework-named "Replaces X" mechanisms (Escort/Reversal/Yield/Migration/
-Offer/Enter), Employment (Law 4) and Practice-decay (§6.3) enforcement, and the WordNet/VerbNet-
-backed kinetic typography layer (`ConveyVerb`/`ConveyNoun`/`ConveySvoScene`) — that last one is a
-large, genuinely separate undertaking (real linguistic data, not just a UI port) and hasn't been
-started. Being added incrementally, same cadence as `convey` itself was built.
+**Not yet done:** `ConveyAffordance` (self-revealing interactivity), `ConveyInteraction`
+(ripple/press/long-press/swipe), `ConveyTransform` (scale/lift/rotate/slide), `ConveyMorph`
+(persistent-identity shape/color morphing), `ConveyLife` (continuous idle motion), and the
+WordNet/VerbNet-backed kinetic typography layer (`ConveyVerb`/`ConveyNoun`/`ConveyKineticText`/
+`ConveySvoScene`) — that last one is a large, genuinely separate undertaking (real linguistic
+data and a from-scratch 2D force-physics port, not just a UI port) and hasn't been started.
+Being added incrementally, same cadence as `convey` itself was built.
 
 ## License
 
