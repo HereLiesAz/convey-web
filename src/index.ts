@@ -71,6 +71,9 @@ export { ConveyPracticeRegistry, conveyPracticeDecay, decayed } from './practice
 export { ConveyAffordance, applyConveyAffordance, ConveyAffordanceElement, conveyInert } from './affordance.js'
 export type { ConveyAffordanceKind, ConveyAffordanceHandle } from './affordance.js'
 
+export { conveyRipple, conveyPress, conveyLongPress, conveySwipe } from './interaction.js'
+export type { ConveyInteractionHandle, ConveySwipeDirection } from './interaction.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
