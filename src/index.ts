@@ -50,6 +50,14 @@ export { ConveyMigrationElement } from './migration.js'
 export { ConveyOfferElement } from './offer.js'
 export type { ConveyOfferPhase } from './offer.js'
 
+export {
+  ConveyOriginRegistry,
+  ConveyOriginElement,
+  ConveyEnterElement,
+  provideOriginRegistry,
+  nearestOriginRegistry,
+} from './enter.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'

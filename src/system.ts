@@ -1,6 +1,7 @@
 import { ConveyGrammar } from './grammar.js'
 import { ConveyWeightRegistry, provideWeightRegistry } from './weight.js'
 import { ConveyEscortRegistry, provideEscortRegistry } from './escort.js'
+import { ConveyOriginRegistry, provideOriginRegistry } from './enter.js'
 
 /**
  * The convey-web system root — the web port of convey's `ConveyProvider`/`ConveySystem`.
@@ -8,7 +9,8 @@ import { ConveyEscortRegistry, provideEscortRegistry } from './escort.js'
  * Activates enforcement for everything nested inside it: a `ConveyWeightRegistry` any
  * descendant `<convey-weight>` element (or a framework adapter reading `.weightRegistry`)
  * registers into, a `ConveyEscortRegistry` any descendant `<convey-gate-location>`/
- * `<convey-escorted>` pair uses, and a `ConveyGrammar` descendant components resolve motion
+ * `<convey-escorted>` pair uses, a `ConveyOriginRegistry` any descendant `<convey-origin>`/
+ * `<convey-enter>` pair uses, and a `ConveyGrammar` descendant components resolve motion
  * meanings against.
  *
  * ```html
@@ -30,6 +32,7 @@ import { ConveyEscortRegistry, provideEscortRegistry } from './escort.js'
 export class ConveySystemElement extends HTMLElement {
   #weightRegistry: ConveyWeightRegistry
   #escortRegistry: ConveyEscortRegistry
+  #originRegistry: ConveyOriginRegistry
   #grammar: ConveyGrammar
 
   constructor() {
@@ -39,12 +42,14 @@ export class ConveySystemElement extends HTMLElement {
       enforce: this.getAttribute('enforce') !== 'false',
     })
     this.#escortRegistry = new ConveyEscortRegistry()
+    this.#originRegistry = new ConveyOriginRegistry()
     this.#grammar = ConveyGrammar.Default
   }
 
   connectedCallback(): void {
     provideWeightRegistry(this, this.#weightRegistry)
     provideEscortRegistry(this, this.#escortRegistry)
+    provideOriginRegistry(this, this.#originRegistry)
   }
 
   get weightRegistry(): ConveyWeightRegistry {
@@ -53,6 +58,10 @@ export class ConveySystemElement extends HTMLElement {
 
   get escortRegistry(): ConveyEscortRegistry {
     return this.#escortRegistry
+  }
+
+  get originRegistry(): ConveyOriginRegistry {
+    return this.#originRegistry
   }
 
   get grammar(): ConveyGrammar {
