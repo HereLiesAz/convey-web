@@ -74,6 +74,15 @@ export type { ConveyAffordanceKind, ConveyAffordanceHandle } from './affordance.
 export { conveyRipple, conveyPress, conveyLongPress, conveySwipe } from './interaction.js'
 export type { ConveyInteractionHandle, ConveySwipeDirection } from './interaction.js'
 
+export {
+  conveyScaleOnPress,
+  conveyLiftOnHover,
+  conveyRotateOnHover,
+  conveyScaleIn,
+  conveySlideIn,
+} from './transform.js'
+export type { ConveyTransformHandle } from './transform.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
