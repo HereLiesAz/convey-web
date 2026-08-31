@@ -54,11 +54,16 @@ See [AGENTS.md](AGENTS.md) for the full module shape and build instructions.
 ## What's actually here today
 
 **Built, tested:** the tokens (`ConveyMotion`/`Shape`/`Color`/`Size`), `ConveyGrammar`, and
-`ConveyWeight` enforcement layer — ported bit-for-bit from `convey`'s own values and rules.
+`ConveyWeight` enforcement layer, plus every component from `convey`'s first concrete-visual-
+component batch — `<convey-avatar>`, `<convey-badge>`, `<convey-card>`, `<convey-chip>`,
+`<convey-list-item>`, `<convey-navigation-bar>`, `<convey-segmented-control>`,
+`<convey-switch>`, `<convey-top-bar>` — all ported bit-for-bit from `convey`'s own Kotlin
+source. 51 tests, 0 `npm audit` vulnerabilities.
 
-**Not yet done:** concrete visual components and the framework-named "Replaces X" mechanisms
-that `convey` already has. Being added incrementally — see [AGENTS.md](AGENTS.md) for the
-honest current-state accounting.
+**Not yet done:** the framework-named "Replaces X" mechanisms (Escort/Reversal/Yield/Migration/
+Offer/Enter), Employment/Practice-decay enforcement, and the WordNet/VerbNet-backed kinetic
+typography layer. Being added incrementally — see [AGENTS.md](AGENTS.md) for the honest
+current-state accounting.
 
 ## License
 
