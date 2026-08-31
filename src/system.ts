@@ -1,13 +1,15 @@
 import { ConveyGrammar } from './grammar.js'
 import { ConveyWeightRegistry, provideWeightRegistry } from './weight.js'
+import { ConveyEscortRegistry, provideEscortRegistry } from './escort.js'
 
 /**
  * The convey-web system root — the web port of convey's `ConveyProvider`/`ConveySystem`.
  *
  * Activates enforcement for everything nested inside it: a `ConveyWeightRegistry` any
  * descendant `<convey-weight>` element (or a framework adapter reading `.weightRegistry`)
- * registers into, and a `ConveyGrammar` descendant components resolve motion meanings
- * against.
+ * registers into, a `ConveyEscortRegistry` any descendant `<convey-gate-location>`/
+ * `<convey-escorted>` pair uses, and a `ConveyGrammar` descendant components resolve motion
+ * meanings against.
  *
  * ```html
  * <convey-system>
@@ -27,6 +29,7 @@ import { ConveyWeightRegistry, provideWeightRegistry } from './weight.js'
  */
 export class ConveySystemElement extends HTMLElement {
   #weightRegistry: ConveyWeightRegistry
+  #escortRegistry: ConveyEscortRegistry
   #grammar: ConveyGrammar
 
   constructor() {
@@ -35,15 +38,21 @@ export class ConveySystemElement extends HTMLElement {
       maxPrimary: this.#intAttribute('max-primary', 3),
       enforce: this.getAttribute('enforce') !== 'false',
     })
+    this.#escortRegistry = new ConveyEscortRegistry()
     this.#grammar = ConveyGrammar.Default
   }
 
   connectedCallback(): void {
     provideWeightRegistry(this, this.#weightRegistry)
+    provideEscortRegistry(this, this.#escortRegistry)
   }
 
   get weightRegistry(): ConveyWeightRegistry {
     return this.#weightRegistry
+  }
+
+  get escortRegistry(): ConveyEscortRegistry {
+    return this.#escortRegistry
   }
 
   get grammar(): ConveyGrammar {

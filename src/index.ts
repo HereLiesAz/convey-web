@@ -32,6 +32,17 @@ export type { GrammarEntry } from './grammar.js'
 
 export { ConveySystemElement, grammarOf } from './system.js'
 
+export {
+  ConveyGate,
+  ConveyEscortRegistry,
+  ConveyGateLocationElement,
+  ConveyEscortedElement,
+  provideEscortRegistry,
+  nearestEscortRegistry,
+} from './escort.js'
+
+export { ConveyReversalState, ConveyReversalElement } from './reversal.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
