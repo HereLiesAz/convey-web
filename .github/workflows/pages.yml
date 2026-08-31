@@ -1,7 +1,8 @@
 # Publishes demo/index.html as the repo's GitHub Pages site, alongside the built library
-# (dist/convey-web.js + convey-web.css) it imports directly via <script type="module">. The
-# demo is a plain framework-free HTML page -- no bundler step of its own -- so this workflow's
-# only job is to build the library and lay both next to each other in the Pages artifact.
+# (dist/convey-web.js + convey-web.css, plus the kinetic-typography entry point and its
+# data chunks) it imports directly via <script type="module">. The demo is a plain
+# framework-free HTML page -- no bundler step of its own -- so this workflow's only job is
+# to build the library and lay every dist/ output next to it in the Pages artifact.
 
 name: Deploy demo to GitHub Pages
 
@@ -49,8 +50,7 @@ jobs:
         run: |
           mkdir -p site
           cp demo/index.html site/index.html
-          cp dist/convey-web.js site/convey-web.js
-          cp dist/convey-web.css site/convey-web.css
+          cp dist/*.js dist/*.css site/
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

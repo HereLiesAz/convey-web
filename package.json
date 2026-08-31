@@ -16,7 +16,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/convey-web.js"
     },
-    "./style.css": "./dist/convey-web.css"
+    "./style.css": "./dist/convey-web.css",
+    "./kinetic": {
+      "types": "./dist/kinetic.d.ts",
+      "import": "./dist/kinetic.js"
+    }
   },
   "files": [
     "dist"

@@ -415,6 +415,7 @@
   <a href="#mechanisms">Mechanisms</a>
   <a href="#interaction">Interaction</a>
   <a href="#life">Life</a>
+  <a href="#kinetic">Kinetic typography</a>
   <a href="#install">Install</a>
 </nav>
 
@@ -704,6 +705,75 @@
     </div>
   </section>
 
+  <!-- ── Kinetic typography ────────────────────────────────────────── -->
+  <section class="demo-section" id="kinetic">
+    <div class="section-head">
+      <span class="kicker">Kinetic typography · @hereliesaz/convey-web/kinetic</span>
+      <h2>Verb-aware motion, from real WordNet + VerbNet data</h2>
+      <p>
+        A separate entry point — deterministic verb/noun classification (Simplified Lesk word-
+        sense disambiguation) over real Princeton WordNet 3.0 + VerbNet 3.3 data drives per-word
+        kinetic typography and a from-scratch 2D force-physics simulation. Not a lookup table of
+        curated words — the same generator that ported this data faithfully reproduces the
+        Compose Multiplatform sibling library's classification for any English verb or noun.
+        Opt-in on purpose: this data is ~4MB gzipped, so it loads only when you ask.
+      </p>
+    </div>
+    <div class="demo-box" id="kinetic-loader" style="text-align:center;">
+      <div class="label">Load the kinetic engine</div>
+      <p style="color:var(--on-surface-variant); font-size:13px; max-width:520px; margin:0 auto 16px;">
+        Downloads the WordNet-derived verb (~1.5MB) and noun (~10MB) lexicon data — about 4MB
+        gzipped over the wire — then classifies every word below in your browser, live.
+      </p>
+      <button class="btn primary" id="kinetic-load-btn">Load kinetic engine (~4MB)</button>
+      <div class="log-line" id="kinetic-load-log" style="margin-top:12px;"></div>
+    </div>
+
+    <div id="kinetic-demos" hidden>
+      <div class="card-grid" style="margin-bottom:16px;">
+        <div class="demo-box">
+          <div class="label">convey-kinetic-text — per-glyph idle motion + burst</div>
+          <div class="stage">
+            <convey-kinetic-text id="kt-demo" text="KINETIC" stagger-ms="90" clickable style="font-size:28px; font-weight:700;"></convey-kinetic-text>
+          </div>
+          <div class="note">Click the word — each letter bursts in a wave, left to right.</div>
+        </div>
+
+        <div class="demo-box">
+          <div class="label">convey-kinetic-sentence — per-word motion from verb classification</div>
+          <input id="sentence-input" value="The kitten pounces and giggles"
+            style="width:100%; background:var(--surface-container-highest); border:1px solid var(--outline); color:var(--on-surface); border-radius:10px; padding:10px 12px; font:inherit; margin-bottom:14px;" />
+          <div class="stage" style="justify-content:flex-start;">
+            <convey-kinetic-sentence id="sentence-demo" text="The kitten pounces and giggles"></convey-kinetic-sentence>
+          </div>
+          <div class="note" id="sentence-log"></div>
+        </div>
+      </div>
+
+      <div class="demo-box">
+        <div class="label">convey-svo-scene — a heuristic subject/verb/object chunk, animated by real physics</div>
+        <input id="svo-input" value="The cheetah chased the gazelle"
+          style="width:100%; background:var(--surface-container-highest); border:1px solid var(--outline); color:var(--on-surface); border-radius:10px; padding:10px 12px; font:inherit; margin-bottom:14px;" />
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+          <button class="plain-btn" data-svo-example="The cheetah chased the gazelle">chased (continuous Motion)</button>
+          <button class="plain-btn" data-svo-example="The child ran toward the door">ran (MannerAgent)</button>
+          <button class="plain-btn" data-svo-example="The puppy carried the stick">carried (Contact)</button>
+          <button class="plain-btn" data-svo-example="The scientist loved the results">loved (no motion — falls back)</button>
+        </div>
+        <div class="note" style="margin-top:0; margin-bottom:14px;">
+          Try "The dog carried the stick" — the heuristic picks "dog" as the verb (WordNet really
+          does have a verb sense, "to dog" = pursue relentlessly) instead of "carried". Not a bug:
+          this chunker is deliberately not a real syntactic parser, same documented limitation as
+          the Kotlin original.
+        </div>
+        <div style="background:var(--surface-container); border-radius:14px; overflow:hidden;">
+          <convey-svo-scene id="svo-demo" sentence="The cheetah chased the gazelle" scene-width="240" scene-height="110" style="font-size:20px; font-weight:600;"></convey-svo-scene>
+        </div>
+        <div class="note" id="svo-log"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Install ───────────────────────────────────────────────────── -->
   <section class="demo-section" id="install">
     <div class="section-head">
@@ -893,6 +963,82 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
   applyConveyLife(document.getElementById('life-wobble'), ConveyLife.Wobble())
   const burstTile = document.getElementById('life-burst')
   burstTile.addEventListener('click', () => triggerConveyLifeBurst(burstTile))
+
+  // ── Kinetic typography ─────────────────────────────────────────────
+  const kineticLoadBtn = document.getElementById('kinetic-load-btn')
+  const kineticLoadLog = document.getElementById('kinetic-load-log')
+  const kineticLoader = document.getElementById('kinetic-loader')
+  const kineticDemos = document.getElementById('kinetic-demos')
+
+  kineticLoadBtn.addEventListener('click', async () => {
+    kineticLoadBtn.disabled = true
+    kineticLoadBtn.textContent = 'Loading…'
+    kineticLoadLog.textContent = 'Fetching verb + noun lexicon data…'
+    const started = performance.now()
+    try {
+      const kinetic = await import('./kinetic.js')
+      await Promise.all([kinetic.loadConveyVerbData(), kinetic.loadConveyNounData()])
+      const seconds = ((performance.now() - started) / 1000).toFixed(1)
+      kineticLoadLog.textContent = `Loaded in ${seconds}s.`
+      kineticLoader.hidden = true
+      kineticDemos.hidden = false
+      wireKineticDemos(kinetic)
+    } catch (err) {
+      kineticLoadLog.textContent = `Failed to load: ${err.message}`
+      kineticLoadBtn.disabled = false
+      kineticLoadBtn.textContent = 'Retry'
+    }
+  })
+
+  function wireKineticDemos(kinetic) {
+    // convey-kinetic-text
+    const ktDemo = document.getElementById('kt-demo')
+    ktDemo.idle = ConveyLife.Wobble({ period: 3000, skewDegrees: 3 })
+    ktDemo.addEventListener('convey-click', () => ktDemo.triggerBurst())
+
+    // convey-kinetic-sentence
+    const sentenceInput = document.getElementById('sentence-input')
+    const sentenceDemo = document.getElementById('sentence-demo')
+    const sentenceLog = document.getElementById('sentence-log')
+    function updateSentence() {
+      sentenceDemo.setAttribute('text', sentenceInput.value)
+      const words = sentenceInput.value.split(/\s+/).filter(Boolean)
+      const classes = words.map((w) => `${w}→${kinetic.classifyVerb(w, sentenceInput.value)}`)
+      sentenceLog.textContent = classes.join('  ·  ')
+    }
+    sentenceInput.addEventListener('input', updateSentence)
+    updateSentence()
+
+    // convey-svo-scene
+    const svoInput = document.getElementById('svo-input')
+    const svoDemo = document.getElementById('svo-demo')
+    const svoLog = document.getElementById('svo-log')
+    function updateSvo() {
+      const sentence = svoInput.value
+      svoDemo.setAttribute('sentence', sentence)
+      const parts = kinetic.parseSvoHeuristic(sentence)
+      if (!parts) {
+        svoLog.textContent = 'Could not split into subject/verb/object — rendering as plain kinetic text.'
+        return
+      }
+      const verbClass = kinetic.classifyVerb(parts.verb, sentence)
+      const timeline = kinetic.toEventTimeline(verbClass)
+      const subject = kinetic.classifyNoun(parts.subject, sentence)
+      const object = kinetic.classifyNoun(parts.obj, sentence)
+      svoLog.textContent =
+        `${parts.subject} / ${parts.verb} (${verbClass}) / ${parts.obj} — ` +
+        `approaches:${timeline.approaches} contactAtEnd:${timeline.contactAtEnd} continuousNoContact:${timeline.continuousNoContact} — ` +
+        `subject:${subject?.animacy ?? '?'} object:${object?.countability ?? '?'}`
+    }
+    svoInput.addEventListener('input', updateSvo)
+    for (const btn of document.querySelectorAll('[data-svo-example]')) {
+      btn.addEventListener('click', () => {
+        svoInput.value = btn.dataset.svoExample
+        updateSvo()
+      })
+    }
+    updateSvo()
+  }
 </script>
 
 </body>

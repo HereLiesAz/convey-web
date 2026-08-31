@@ -23,19 +23,27 @@ disagree.
 
 [`demo/index.html`](demo/index.html) is a plain, framework-free HTML page exercising every
 component and mechanism in this package — tokens, weight enforcement, all nine visual
-components, Escort/Reversal/Yield/Migration/Offer, affordance/interaction/life. It imports the
-library directly via `<script type="module">` from `./convey-web.js`/`./convey-web.css` (no
-bundler of its own), so it only works once those sit next to it — which is exactly what
+components, Escort/Reversal/Yield/Migration/Offer, affordance/interaction/life, and (behind an
+explicit "Load kinetic engine" button, since its data is ~4MB gzipped) the kinetic-typography
+layer: a live `<convey-kinetic-text>`, a `<convey-kinetic-sentence>` with an editable sentence
+input showing each word's real classification, and a `<convey-svo-scene>` with an editable
+sentence and four example buttons demonstrating different verb-timeline shapes (continuous
+Motion, MannerAgent, Contact, and a no-motion Emotion fallback) — including one documented
+example ("The dog carried the stick") that deliberately demonstrates the heuristic chunker's
+known limitation live (WordNet really does have a verb sense of "dog"). It imports the library
+directly via `<script type="module">` from `./convey-web.js`/`./convey-web.css`/`./kinetic.js`
+(no bundler of its own), so it only works once those sit next to it — which is exactly what
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml) does: build the library, copy
-`dist/convey-web.js`/`dist/convey-web.css` alongside a copy of `demo/index.html` as `index.html`,
-and deploy that directory to GitHub Pages on every push to `main` that touches `demo/`, `src/`,
-or the build config. Live at <https://hereliesaz.github.io/convey-web/> (requires the repo's
-Pages source set to "GitHub Actions" under Settings → Pages, a one-time manual step this
-workflow can't perform on its own).
+every `dist/*.js`/`dist/*.css` output (including the kinetic entry point and its data chunks)
+alongside a copy of `demo/index.html` as `index.html`, and deploy that directory to GitHub
+Pages on every push to `main` that touches `demo/`, `src/`, or the build config. Live at
+<https://hereliesaz.github.io/convey-web/> (requires the repo's Pages source set to "GitHub
+Actions" under Settings → Pages, a one-time manual step this workflow can't perform on its own).
 
-To preview `demo/index.html` locally: `npm run build`, then copy `dist/convey-web.js` and
-`dist/convey-web.css` next to it (or symlink) and serve the directory with any static file
-server — opening it via `file://` won't work, since module scripts require an HTTP origin.
+To preview `demo/index.html` locally: `npm run build`, then copy every `dist/*.js`/`dist/*.css`
+file next to it (or symlink the whole `dist/` directory's contents in) and serve the directory
+with any static file server — opening it via `file://` won't work, since module scripts require
+an HTTP origin.
 
 ## Module shape
 
@@ -170,6 +178,58 @@ And the remaining supporting primitives, completing `convey`'s enforcement/motio
   (Breathe/Twinkle/Wobble) for chrome that should never look inert, distinct from
   `ConveyAffordance` (teaches once, then stops) — `ConveyLife` never stops on its own.
 
+### `kinetic/` — the WordNet+VerbNet-backed kinetic-typography layer
+
+A **separate entry point** (`@hereliesaz/convey-web/kinetic`, `src/kinetic/index.ts`), not
+re-exported from the main `index.ts` — its data assets (~1.5MB verb, ~10MB noun, both
+WordNet-derived) are opt-in, never part of the default bundle. See
+`src/kinetic/data/README.md` for the data format and regeneration steps, and
+`THIRD_PARTY_NOTICES.md` for its license (Princeton WordNet 3.0 requires the notice travel
+with any redistribution; VerbNet 3.3 is a build-time-only input, never redistributed as raw
+data — same discipline `convey`'s own Kotlin data follows).
+
+- `verb.ts` — `ConveyVerbLexicon`/`loadConveyVerbData()`: deterministic verb classification
+  (`ConveyVerbClass`, 22 cases — 15 WordNet lexicographer domains plus 7 VerbNet-derived
+  refinements plus `Unclassified`) via Simplified Lesk word-sense disambiguation over real
+  WordNet 3.0 + VerbNet 3.3 data, plus `toEventTimeline()` (a verb's reduction onto the
+  physical-event booleans `svo-scene.ts`'s force simulator drives from) and `toConveyLife()`
+  (a verb class's idle-motion profile). Data loads asynchronously (`await
+  loadConveyVerbData()`) — the Kotlin original's data is compiled into the binary and can
+  afford a synchronous `by lazy`; this port's data is a separate fetched/bundled asset, so
+  every classification function throws until loading resolves.
+- `noun.ts` — `ConveyNounLexicon`: the same WordNet-data/Simplified-Lesk shape as `verb.ts`,
+  classifying animacy and count/mass instead. Returns `null` (not `Unclassified` — nouns have
+  no catch-all case) when a word can't be resolved.
+- `force-dynamics.ts` — `Vec2`/`ConveyRigidBody`/`ConveySpringMassBody`/`ConveyGaitOscillator`/
+  `attraction`/`repulsion`/`hasCollided`: the pure-math 2D physics primitives `svo-scene.ts`
+  consumes, symplectic-Euler-integrated, no external physics dependency — same hand-scoped
+  primitive set as the Kotlin original's `foundation/ConveyForceDynamics.kt`, ported by direct
+  translation (self-contained, no data dependency, no web-platform gap to navigate).
+- `kinetic-text.ts` — `<convey-kinetic-text>` (per-glyph idle motion + `triggerBurst()`, the
+  imperative equivalent of the Kotlin original's `triggerKey`-change detection since there's no
+  composition lifecycle to hook a key comparison into) and `<convey-kinetic-sentence>` (per-word
+  motion from `ConveyVerbLexicon`'s classification of each word, each word its own
+  `<convey-kinetic-text>` instance so within-word stagger still applies).
+- `svo-scene.ts` — `<convey-svo-scene>` and `parseSvoHeuristic()`: splits a sentence into
+  subject/verb/object via a heuristic chunker (deliberately not a real syntactic parser — see
+  its own doc comment for a live example of the resulting limitation), classifies the nouns
+  and verb, and drives `force-dynamics.ts` via a `requestAnimationFrame` loop to animate the
+  subject toward the object (translate, collide, squash/stretch, gait bob/tilt for an animate
+  subject). Falls back to `<convey-kinetic-sentence>` when the heuristic can't split the
+  sentence or the verb has no spatial component.
+
+The data-generation pipeline (`scripts/generate-lexicon-data.mjs`) is a from-scratch
+reconstruction of `convey`'s own (undocumented, not-checked-into-that-repo) `codegen.py` --
+built from that repo's docs' prose description of the algorithm plus direct inspection of the
+raw WordNet/VerbNet file formats, not a port of code that was never available to read. Its
+output was validated against every specific example `convey`'s own docs cite (breathe→Body
+overridden to SubtleBody via VerbNet's `breathe-40.1.2`, run→MannerAgent via `run-51.3`,
+person/animal as the animacy roots, water as a Mass noun) and its synset/lemma counts land
+almost exactly on the noun counts convey's own SVO doc cites — see
+`src/kinetic/data/README.md`'s own "fidelity" section for the full account, including where
+this reconstruction is a good-faith approximation rather than a guaranteed byte-for-byte match
+(the VerbNet-refinement priority rule in particular).
+
 Several real jsdom-vs-real-browser gaps were found and fixed while writing these mechanisms'
 tests, all guarded the same way `safeAnimate()` guards `Element.animate()`: `scrollIntoView()`
 isn't implemented in jsdom either (`escort.ts` feature-detects it); neither is pointer capture
@@ -196,13 +256,22 @@ stack. Documented directly on `ConveyWeightRegistry.register()`.
 **Built, tested:** the full tokens/grammar/weight enforcement layer, every component from
 `convey`'s first concrete-visual-component batch (the same 9 listed in `convey/AGENTS.md`), all
 six framework-named "Replaces X" mechanisms (Escort/Reversal/Yield/Migration/Offer/Enter),
-Employment (Law 4)/Practice-decay (§6.3) enforcement, and the remaining supporting primitives —
-`ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`, `ConveyMorph`, `ConveyLife` — 177
-tests, `npm run build` and `npm test` both pass clean, 0 `npm audit` vulnerabilities.
+Employment (Law 4)/Practice-decay (§6.3) enforcement, the remaining supporting primitives —
+`ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`, `ConveyMorph`, `ConveyLife` — and
+now the WordNet/VerbNet-backed kinetic-typography layer (`ConveyVerbLexicon`/`ConveyNounLexicon`,
+the pure-math force-physics primitives, `<convey-kinetic-text>`/`<convey-kinetic-sentence>`/
+`<convey-svo-scene>`) as a separate `@hereliesaz/convey-web/kinetic` entry point — 246 tests,
+`npm run build` and `npm test` both pass clean, 0 `npm audit` vulnerabilities.
 
-**Not yet done:** the WordNet/VerbNet-backed kinetic typography layer (`ConveyVerb`/`ConveyNoun`/
-`ConveyKineticText`/`ConveySvoScene`) — a large, genuinely separate undertaking (real linguistic
-data and a from-scratch 2D force-physics port, not just a UI port) and hasn't been started.
+**Not yet done:** nothing from `convey`'s current inventory — every mechanism/enforcement
+primitive and the kinetic-typography layer are now ported. Two honest, documented gaps within
+what IS built: `ConveyMorph` uses CSS's native shape interpolation rather than a from-scratch
+path-sampling engine (covers fewer shape-pair transitions than the Kotlin original — see its
+own doc comment), and the kinetic layer's data-generation pipeline
+(`scripts/generate-lexicon-data.mjs`) is a from-scratch reconstruction of `convey`'s own
+undocumented `codegen.py` rather than a port of it (that script was never checked into the
+Kotlin repo to read) — validated against every specific example the Kotlin docs cite, but not
+diffed synset-by-synset against real `codegen.py` output. See `src/kinetic/data/README.md`.
 
 ## License
 

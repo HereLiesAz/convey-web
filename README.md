@@ -55,6 +55,28 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)
 
 See [AGENTS.md](AGENTS.md) for the full module shape and build instructions.
 
+## Kinetic typography
+
+A separate entry point — deterministic verb/noun classification (Simplified Lesk word-sense
+disambiguation) over real Princeton WordNet 3.0 + VerbNet 3.3 data drives per-word kinetic
+typography and a from-scratch 2D force-physics simulation, the same subsystem as `convey`'s own
+`ConveyVerb`/`ConveyNoun`/`ConveyKineticText`/`ConveySvoScene`. Opt-in: its data (~1.5MB verb,
+~10MB noun) is never part of the default bundle.
+
+```ts
+import { loadConveyVerbData, loadConveyNounData } from '@hereliesaz/convey-web/kinetic'
+
+await Promise.all([loadConveyVerbData(), loadConveyNounData()])
+```
+
+```html
+<convey-svo-scene sentence="The cheetah chased the gazelle"></convey-svo-scene>
+```
+
+Try it live in the [demo](https://hereliesaz.github.io/convey-web/#kinetic) — an editable
+sentence input drives a real `<convey-svo-scene>`, with example sentences covering different
+verb-timeline shapes.
+
 ## What's actually here today
 
 **Built, tested:** the tokens (`ConveyMotion`/`Shape`/`Color`/`Size`), `ConveyGrammar`, and
@@ -63,14 +85,19 @@ component batch — `<convey-avatar>`, `<convey-badge>`, `<convey-card>`, `<conv
 `<convey-list-item>`, `<convey-navigation-bar>`, `<convey-segmented-control>`,
 `<convey-switch>`, `<convey-top-bar>`; all six framework-named "Replaces X" mechanisms —
 `<convey-escorted>`, `<convey-reversal>`, `<convey-yield>`, `<convey-migration>`,
-`<convey-offer>`, `<convey-enter>`; Employment (Law 4)/Practice-decay (§6.3) enforcement; and the
+`<convey-offer>`, `<convey-enter>`; Employment (Law 4)/Practice-decay (§6.3) enforcement; the
 remaining supporting primitives — `ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`,
-`ConveyMorph`, `ConveyLife`. All ported bit-for-bit from `convey`'s own Kotlin source. 177 tests,
-0 `npm audit` vulnerabilities.
+`ConveyMorph`, `ConveyLife`; and the WordNet/VerbNet-backed kinetic-typography layer described
+above. All ported bit-for-bit from `convey`'s own Kotlin source where that source exists to
+compare against. 246 tests, 0 `npm audit` vulnerabilities.
 
-**Not yet done:** the WordNet/VerbNet-backed kinetic typography layer
-(`ConveyVerb`/`ConveyNoun`/`ConveyKineticText`/`ConveySvoScene`) — see
-[AGENTS.md](AGENTS.md) for the honest current-state accounting.
+Two honest, documented gaps within what's built: `ConveyMorph` uses CSS's native shape
+interpolation rather than a from-scratch path-sampling engine (fewer shape-pair transitions
+than the Kotlin original), and the kinetic layer's data-generation pipeline is a from-scratch
+reconstruction of `convey`'s own undocumented generator script rather than a port of it (that
+script was never checked into the Kotlin repo). See [AGENTS.md](AGENTS.md) and
+[`src/kinetic/data/README.md`](src/kinetic/data/README.md) for the honest current-state
+accounting.
 
 ## License
 
