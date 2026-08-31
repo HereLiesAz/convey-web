@@ -53,6 +53,22 @@ export class ConveyWeightRegistry {
     this.enforce = options.enforce ?? true
   }
 
+  /**
+   * Registers `id` at `weight`, then validates. The registration is recorded *before*
+   * validation runs — a thrown `ConveyViolationError` reports the violation, it does not
+   * roll the registration back; `heroCount`/`primaryCount` reflect the offending state too.
+   *
+   * When called from inside a custom element's `connectedCallback` (as `<convey-weight>`,
+   * `<convey-list-item>`, and `<convey-card>` all do), a thrown error here does not
+   * propagate to whatever DOM call triggered the connection (`appendChild`, `innerHTML`,
+   * etc.) — the WHATWG custom elements spec requires exceptions from a reaction callback to
+   * be *reported* (the DOM's own "uncaught error," visible in the console/devtools and to a
+   * `window.addEventListener('error', ...)` listener) rather than thrown back at the
+   * caller. This is real, standard browser behavior (verified against jsdom's own spec
+   * implementation, not assumed), not a limitation specific to this registry — it's simply
+   * a different delivery mechanism than Compose's crash-on-compose, not a weaker one: it
+   * still fails loud, just asynchronously rather than by unwinding the call stack.
+   */
   register(id: unknown, weight: ConveyWeight): void {
     this.registry.set(id, weight)
     if (this.enforce) this.validate()
@@ -119,7 +135,14 @@ export function provideWeightRegistry(root: Element, registry: ConveyWeightRegis
   registryOfElement.set(root, registry)
 }
 
-function findRegistry(el: Element): ConveyWeightRegistry | undefined {
+/**
+ * The nearest ancestor `ConveyWeightRegistry` for `el`, walking up through shadow-DOM
+ * boundaries (a shadow root's `host` counts as the next ancestor). Any component that
+ * needs to register *itself* — not a wrapped child — into the ambient registry (see
+ * `ConveyListItem` for an example) uses this directly, the same lookup `<convey-weight>`
+ * itself performs.
+ */
+export function nearestWeightRegistry(el: Element): ConveyWeightRegistry | undefined {
   let node: Element | null = el
   while (node) {
     const found = registryOfElement.get(node)
@@ -154,7 +177,7 @@ export class ConveyWeightElement extends HTMLElement {
   #registry: ConveyWeightRegistry | undefined
 
   connectedCallback(): void {
-    this.#registry = findRegistry(this)
+    this.#registry = nearestWeightRegistry(this)
     this.#registerCurrent()
   }
 

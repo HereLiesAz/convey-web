@@ -23,6 +23,7 @@ export {
   ConveyViolationError,
   ConveyWeightElement,
   provideWeightRegistry,
+  nearestWeightRegistry,
 } from './weight.js'
 export type { ConveyWeight } from './weight.js'
 
@@ -34,3 +35,6 @@ export { ConveySystemElement, grammarOf } from './system.js'
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
+export { ConveyAvatarElement } from './components/avatar.js'
+export { ConveyListItemElement } from './components/list-item.js'
+export { ConveyCardElement } from './components/card.js'
