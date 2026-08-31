@@ -45,6 +45,8 @@ export { ConveyReversalState, ConveyReversalElement } from './reversal.js'
 
 export { ConveyYieldElement } from './yield.js'
 
+export { ConveyMigrationElement } from './migration.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
