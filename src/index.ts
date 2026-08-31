@@ -85,6 +85,9 @@ export type { ConveyTransformHandle } from './transform.js'
 
 export { ConveyMorphController } from './morph.js'
 
+export { ConveyLife, applyConveyLife, triggerConveyLifeBurst } from './life.js'
+export type { ConveyLifeProfile, ConveyLifeHandle } from './life.js'
+
 export { ConveyBadgeElement } from './components/badge.js'
 export { ConveyChipElement } from './components/chip.js'
 export { ConveySwitchElement } from './components/switch.js'
