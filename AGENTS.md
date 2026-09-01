@@ -22,7 +22,9 @@ disagree.
 ## Demo / repo page
 
 [`demo/index.html`](demo/index.html) is a plain, framework-free HTML page exercising every
-component and mechanism in this package — tokens, weight enforcement, all nine visual
+component and mechanism in this package — tokens (including a live `ConveyType` specimen with
+`wght`/`wdth`/`SERF`/`GRAD` sliders — the whole page itself renders in Azrienoch, loaded via
+`@font-face` from `./fonts/Azrienoch-VF.woff2`), weight enforcement, all nine visual
 components, Escort/Reversal/Yield/Migration/Offer, affordance/interaction/life, and the
 kinetic-typography layer — its ~4MB-gzipped data starts fetching automatically on page load (no
 button to click), with the demos below activating live once it resolves: a live
@@ -36,7 +38,8 @@ directly via `<script type="module">` from `./convey-web.js`/`./convey-web.css`/
 (no bundler of its own), so it only works once those sit next to it — which is exactly what
 [`.github/workflows/pages.yml`](.github/workflows/pages.yml) does: build the library, copy
 every `dist/*.js`/`dist/*.css` output (including the kinetic entry point and its data chunks)
-alongside a copy of `demo/index.html` as `index.html`, and deploy that directory to GitHub
+and `demo/fonts/` (the vendored `Azrienoch-VF.woff2` + its OFL notice) alongside a copy of
+`demo/index.html` as `index.html`, and deploy that directory to GitHub
 Pages on every push to `main` that touches `demo/`, `src/`, or the build config. Live at
 <https://hereliesaz.github.io/convey-web/> (requires the repo's Pages source set to "GitHub
 Actions" under Settings → Pages, a one-time manual step this workflow can't perform on its own).
@@ -66,6 +69,18 @@ same enforcement rules, ported vocabulary rather than a fresh design:
 - `tokens/size.ts` — `ConveySize`: the same spacing/component/elevation/stroke scale, in `rem`
   (not `px`) — `rem` is the web's own density-independent unit, the direct analog of Compose's
   `dp`; every value is `dp / 16`.
+- `tokens/type.ts` — `ConveyType`: this library's official typeface,
+  [Azrienoch](https://github.com/HereLiesAz/Azrienoch) — a multiplex variable font (SIL OFL
+  1.1) exposing `wght`/`wdth`/`SERF`/`GRAD` as one family instead of a family per weight/style.
+  `ConveyTypeAxes` names each axis's real range; `fontVariationSettings(variation)` builds a
+  CSS `font-variation-settings` value from a partial override (unspecified axes fall back to
+  their own default, given values clamp into range); `ConveyTypePreset` names a few common
+  points in the space (`Bold`, `Condensed`, `Slab`, ...); `toFontFaceCss(url)` emits the
+  `@font-face` block. The compiled font itself ships at `fonts/Azrienoch-VF.woff2` (also
+  exported as the `./fonts/Azrienoch-VF.woff2` subpath) — this module has no bundler of its
+  own to resolve that path for you, so `url` is yours to provide, pointed at wherever your own
+  build serves the file from. See `THIRD_PARTY_NOTICES.md` for the font's license, which
+  travels with it as `fonts/Azrienoch-OFL.txt`.
 - `grammar.ts` — `ConveyGrammar`: the meaning→spec vocabulary contract, `ConveyGrammar.Default`
   with the same eight meanings as `ConveyGrammar.kt` (`navigate`/`reveal`/`confirm`/`dismiss`/
   `morph`/`load`/`error`/`delight`), fail-fast `get()` on an undeclared meaning, `audit()`.
@@ -261,8 +276,9 @@ Employment (Law 4)/Practice-decay (§6.3) enforcement, the remaining supporting 
 `ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`, `ConveyMorph`, `ConveyLife` — and
 now the WordNet/VerbNet-backed kinetic-typography layer (`ConveyVerbLexicon`/`ConveyNounLexicon`,
 the pure-math force-physics primitives, `<convey-kinetic-text>`/`<convey-kinetic-sentence>`/
-`<convey-svo-scene>`) as a separate `@hereliesaz/convey-web/kinetic` entry point — 246 tests,
-`npm run build` and `npm test` both pass clean, 0 `npm audit` vulnerabilities.
+`<convey-svo-scene>`) as a separate `@hereliesaz/convey-web/kinetic` entry point, and
+`ConveyType` — this library's official typeface (Azrienoch, a multiplex variable font) — 253
+tests, `npm run build` and `npm test` both pass clean, 0 `npm audit` vulnerabilities.
 
 **Not yet done:** nothing from `convey`'s current inventory — every mechanism/enforcement
 primitive and the kinetic-typography layer are now ported. Two honest, documented gaps within

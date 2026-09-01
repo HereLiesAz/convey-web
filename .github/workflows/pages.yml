@@ -51,6 +51,7 @@ jobs:
           mkdir -p site
           cp demo/index.html site/index.html
           cp dist/*.js dist/*.css site/
+          cp -r demo/fonts site/fonts
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

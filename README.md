@@ -55,6 +55,24 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)
 
 See [AGENTS.md](AGENTS.md) for the full module shape and build instructions.
 
+## Typeface
+
+[Azrienoch](https://github.com/HereLiesAz/Azrienoch) is this library's official typeface — a
+multiplex variable font (SIL OFL 1.1): one family exposing `wght`/`wdth`/`SERF`/`GRAD` as live
+axes instead of a family per weight or style. It ships with this package at
+`fonts/Azrienoch-VF.woff2`.
+
+```ts
+import { ConveyType, fontVariationSettings, toFontFaceCss } from '@hereliesaz/convey-web'
+
+document.head.insertAdjacentHTML('beforeend', `<style>${toFontFaceCss('/fonts/Azrienoch-VF.woff2')}</style>`)
+document.body.style.fontFamily = ConveyType.FontFamily
+el.style.fontVariationSettings = fontVariationSettings({ Weight: 700, Serif: 100 })
+```
+
+The [live demo](https://hereliesaz.github.io/convey-web/#tokens) renders entirely in Azrienoch
+and includes a live `wght`/`wdth`/`SERF`/`GRAD` specimen.
+
 ## Kinetic typography
 
 A separate entry point — deterministic verb/noun classification (Simplified Lesk word-sense
@@ -87,9 +105,10 @@ component batch — `<convey-avatar>`, `<convey-badge>`, `<convey-card>`, `<conv
 `<convey-escorted>`, `<convey-reversal>`, `<convey-yield>`, `<convey-migration>`,
 `<convey-offer>`, `<convey-enter>`; Employment (Law 4)/Practice-decay (§6.3) enforcement; the
 remaining supporting primitives — `ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`,
-`ConveyMorph`, `ConveyLife`; and the WordNet/VerbNet-backed kinetic-typography layer described
-above. All ported bit-for-bit from `convey`'s own Kotlin source where that source exists to
-compare against. 246 tests, 0 `npm audit` vulnerabilities.
+`ConveyMorph`, `ConveyLife`; the WordNet/VerbNet-backed kinetic-typography layer described
+above; and `ConveyType`, this library's official typeface. All ported bit-for-bit from
+`convey`'s own Kotlin source where that source exists to compare against. 253 tests, 0
+`npm audit` vulnerabilities.
 
 Two honest, documented gaps within what's built: `ConveyMorph` uses CSS's native shape
 interpolation rather than a from-scratch path-sampling engine (fewer shape-pair transitions

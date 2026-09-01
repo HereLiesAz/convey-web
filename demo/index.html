@@ -7,6 +7,15 @@
 <meta name="description" content="convey-web: the Conveyance Manifesto as framework-agnostic Web Components. Live, interactive demo." />
 <link rel="stylesheet" href="./convey-web.css" />
 <style>
+  @font-face {
+    font-family: 'Azrienoch';
+    src: url('./fonts/Azrienoch-VF.woff2') format('woff2');
+    font-weight: 180 900;
+    font-stretch: 75% 100%;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root {
     --primary: #7B56F8;
     --on-primary: #FFFFFF;
@@ -46,13 +55,14 @@
     margin: 0;
     background: var(--surface);
     color: var(--on-surface);
-    font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font: 15px/1.6 'Azrienoch', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-variation-settings: 'wght' 420;
     -webkit-font-smoothing: antialiased;
   }
 
   a { color: var(--secondary); }
 
-  h1, h2, h3 { font-weight: 650; letter-spacing: -0.01em; margin: 0; }
+  h1, h2, h3 { font-weight: 700; letter-spacing: -0.01em; margin: 0; font-variation-settings: 'wght' 700; }
 
   code, pre {
     font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -430,6 +440,9 @@
         <code>ConveyColor</code> is a reference palette — every value names a position in the
         hierarchy, not an aesthetic choice. <code>ConveyShape</code> is a radius/chamfer scale a
         component escalates or de-escalates along as its weight changes.
+        <code>ConveyType</code> is this whole page's own typeface —
+        <a href="https://github.com/HereLiesAz/Azrienoch">Azrienoch</a>, a multiplex variable
+        font: one family, four live axes, instead of a family per weight.
       </p>
     </div>
     <div class="demo-box" style="margin-bottom: 16px;">
@@ -443,9 +456,14 @@
         <div class="swatch" style="background: var(--success); color: var(--on-success);">Success</div>
       </div>
     </div>
-    <div class="demo-box">
+    <div class="demo-box" style="margin-bottom: 16px;">
       <div class="label">ConveyShape</div>
       <div class="shape-row" id="shape-row"></div>
+    </div>
+    <div class="demo-box">
+      <div class="label">ConveyType — Azrienoch</div>
+      <div id="type-specimen" style="font-size: 40px; line-height: 1.2; margin-bottom: 20px; font-family: 'Azrienoch', sans-serif;">Conveyance</div>
+      <div id="type-axes" style="display: grid; grid-template-columns: 1fr; gap: 12px;"></div>
     </div>
   </section>
 
@@ -800,6 +818,9 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
     ConveyLife,
     applyConveyLife,
     triggerConveyLifeBurst,
+    ConveyTypeAxes,
+    ConveyTypePreset,
+    fontVariationSettings,
   } from './convey-web.js'
 
   // ── Shapes ──────────────────────────────────────────────────────────
@@ -817,6 +838,41 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
     wrap.appendChild(label)
     shapeRow.appendChild(wrap)
   }
+
+  // ── Type (Azrienoch) ───────────────────────────────────────────────
+  const typeSpecimen = document.getElementById('type-specimen')
+  const typeAxesRow = document.getElementById('type-axes')
+  const typeVariation = { ...ConveyTypePreset.Regular }
+  function applyTypeVariation() {
+    typeSpecimen.style.fontVariationSettings = fontVariationSettings(typeVariation)
+  }
+  for (const axisKey of Object.keys(ConveyTypeAxes)) {
+    const axis = ConveyTypeAxes[axisKey]
+    const row = document.createElement('div')
+    row.style.cssText = 'display:flex; align-items:center; gap:12px;'
+    const label = document.createElement('label')
+    label.style.cssText = 'width:110px; font-size:12px; color:var(--on-surface-variant); flex-shrink:0;'
+    label.textContent = `${axisKey} (${axis.tag})`
+    const slider = document.createElement('input')
+    slider.type = 'range'
+    slider.min = String(axis.min)
+    slider.max = String(axis.max)
+    slider.value = String(typeVariation[axisKey] ?? axis.default)
+    slider.style.flex = '1'
+    const value = document.createElement('span')
+    value.style.cssText = 'width:40px; text-align:right; font-size:12px; color:var(--on-surface-variant);'
+    value.textContent = slider.value
+    slider.addEventListener('input', () => {
+      typeVariation[axisKey] = Number.parseFloat(slider.value)
+      value.textContent = slider.value
+      applyTypeVariation()
+    })
+    row.appendChild(label)
+    row.appendChild(slider)
+    row.appendChild(value)
+    typeAxesRow.appendChild(row)
+  }
+  applyTypeVariation()
 
   // ── Switch ──────────────────────────────────────────────────────────
   const demoSwitch = document.getElementById('demo-switch')

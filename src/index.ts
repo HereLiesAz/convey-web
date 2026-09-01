@@ -18,6 +18,9 @@ export { ConveyColor, cssVariables, toCssVariableBlock, containerFor, contentFor
 
 export { ConveySize } from './tokens/size.js'
 
+export { ConveyType, ConveyTypeAxes, ConveyTypePreset, fontVariationSettings, toFontFaceCss } from './tokens/type.js'
+export type { ConveyTypeAxis, ConveyTypeVariation } from './tokens/type.js'
+
 export {
   ConveyWeightRegistry,
   ConveyViolationError,

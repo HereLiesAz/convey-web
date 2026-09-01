@@ -1,11 +1,13 @@
-# Third-party data notices
+# Third-party notices
+
+## Kinetic-typography lexicon data
 
 `src/kinetic/data/verb-data.txt` and `src/kinetic/data/noun-data.txt` (generated; see
 `src/kinetic/data/README.md` for the pipeline) embed data derived from two external lexical
 resources. Both files are bundled only by this package's `./kinetic` entry point
 (`@hereliesaz/convey-web/kinetic`), never the default entry.
 
-## Princeton WordNet 3.0
+### Princeton WordNet 3.0
 
 `verb-data.txt` embeds WordNet's verb lemma index, synset domains, and synset glosses
 (definition text) in full, as permitted by WordNet's license; `noun-data.txt` embeds the
@@ -39,7 +41,7 @@ copies of the software, database and documentation, including modifications":
 Source: `https://wordnetcode.princeton.edu/3.0/WordNet-3.0.tar.gz`, via the NLTK data mirror at
 `https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/wordnet.zip`.
 
-## VerbNet 3.3
+### VerbNet 3.3
 
 `verb-data.txt` does **not** embed VerbNet's XML text, examples, or documentation — only a
 computed byproduct (a WordNet synset offset → `ConveyVerbClass` refinement code table,
@@ -51,7 +53,7 @@ Karin Kipper-Schuler).
 Source: `https://verbs.colorado.edu/verbnet/`, via the NLTK data mirror at
 `https://raw.githubusercontent.com/nltk/nltk_data/gh-pages/packages/corpora/verbnet3.zip`.
 
-## Relationship to `convey` (the Compose Multiplatform sibling package)
+### Relationship to `convey` (the Compose Multiplatform sibling package)
 
 This data and the classification logic that reads it (`src/kinetic/verb.ts`,
 `src/kinetic/noun.ts`) are an independent TypeScript port of the same subsystem in
@@ -61,3 +63,18 @@ algorithm, regenerated from the same raw corpora, not a copy of convey's compile
 format's per-constant limit; this package's data has no such constraint and ships as two plain
 text assets instead). See `src/kinetic/data/README.md` for the generator and how to reproduce
 or update this data.
+
+## Azrienoch (typeface)
+
+`fonts/Azrienoch-VF.woff2` and `demo/fonts/Azrienoch-VF.woff2` are the compiled variable font
+from [HereLiesAz/Azrienoch](https://github.com/HereLiesAz/Azrienoch) — this package's official
+typeface (`src/tokens/type.ts`'s `ConveyType`), used unmodified. Azrienoch is a Modified
+Version of [Roboto Flex](https://github.com/googlefonts/roboto-flex) and is licensed under the
+[SIL Open Font License, Version 1.1](https://scripts.sil.org/OFL) — reproduced verbatim in
+`fonts/Azrienoch-OFL.txt`, which travels with the font file wherever it's redistributed.
+Roboto Flex's own license and authors are named inside that same OFL notice, per Azrienoch's
+own `README.md`.
+
+The font is a build/runtime asset only — nothing in this package's own source code is derived
+from or a copy of Azrienoch's build pipeline (`fonts/` here holds only the compiled `.woff2`
+output, not Azrienoch's Python tooling or UFO sources).

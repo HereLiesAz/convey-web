@@ -20,10 +20,12 @@
     "./kinetic": {
       "types": "./dist/kinetic.d.ts",
       "import": "./dist/kinetic.js"
-    }
+    },
+    "./fonts/Azrienoch-VF.woff2": "./fonts/Azrienoch-VF.woff2"
   },
   "files": [
-    "dist"
+    "dist",
+    "fonts"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit && vite build",
