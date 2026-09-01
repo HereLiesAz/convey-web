@@ -106,19 +106,31 @@ bit-for-bit from the same Kotlin source:
   `box-shadow` (`0px` collapses to `none`, not a zero-blur shadow that still paints).
 - `chip.ts` — `<convey-chip>`: selectable tag, morphs background/content color on `selected`;
   `convey-remove` is deliberately not wired to any removal mechanism itself.
-- `design.ts` — `<convey-design>` / `ConveyDesignSolver`: Part XI of the Conveyance Manifesto
-  ("The Design Block") — automatic composition for a block of semantic-level text lines
-  (`title`/`header1`/`header2`/`header3`/`body`), solving size/weight/condensation/tracking so
-  the block's silhouette reads as balanced (hierarchy-balance mode for freestanding lines,
-  column-fill mode plus the column-targeting/mirror-fallback rules for lines in a column
-  relationship). `ConveyDesignSolver` is pure, dependency-free math, directly unit-tested; the
-  element itself takes the block's width as an explicit `fullWidthSp` property rather than
-  measuring real rendered glyph metrics — see the file's own doc comment for what that means and
-  what replaces it later. Each line's `motion` (`'none'`/`'kinetic'`/`'sentence'`, default
-  `'none'`) optionally routes it through `<convey-kinetic-text>`/`<convey-kinetic-sentence>` from
-  the separate `kinetic/` entry point (created via `document.createElement`, never statically
+- `design.ts` — `<convey-design>`/`<convey-design-page>`/`ConveyDesignSolver`: Part XI of the
+  Conveyance Manifesto ("The Design Block") — automatic composition for a block of
+  semantic-level text lines (`title`/`header1`/`header2`/`header3`/`body`), solving
+  size/weight/condensation/tracking so the block's silhouette reads as balanced (hierarchy-balance
+  mode for freestanding lines, column-fill mode plus the column-targeting/mirror-fallback rules
+  for lines in a column relationship). `<convey-design-page>` promotes the same rules one level
+  (§11.7): multiple blocks (`blocks`, a JS property of line arrays) relate to each other the way
+  lines within one block do, reusing `targetColumnFor`/the mirror-fallback rule unchanged rather
+  than a separate mechanism, plus height-balancing when a block has fewer lines than the blocks
+  before it. `ConveyDesignSolver` (`solveBlock`/`solvePage`) is pure, dependency-free math,
+  directly unit-tested; the elements take the available width as an explicit `fullWidthSp`
+  property rather than measuring real rendered glyph metrics — see the file's own doc comment for
+  what that means and what replaces it later. Condensation and weight render through real
+  Azrienoch `wdth`/`wght` axes via `fontVariationSettings` (`tokens/type.ts`), not a CSS-transform
+  approximation. Each line's `motion` (`'none'`/`'kinetic'`/`'sentence'`, default `'none'`)
+  optionally routes it through `<convey-kinetic-text>`/`<convey-kinetic-sentence>` from the
+  separate `kinetic/` entry point (created via `document.createElement`, never statically
   imported, so this stays in the main bundle) — per §4.2 of the manifesto, text animation is
-  offered, never assumed.
+  offered, never assumed. A line with `isAct` set ignores `motion` and always renders through
+  `<convey-act-text>` (`decoration.ts`) instead.
+- `decoration.ts` — `<convey-act-text>`: Part IV §4.2, "Text as an Act" — the Decoration channel.
+  A persistent visual marker (`text-decoration: underline`) on text that is itself an Act, plus a
+  one-time Tell burst through `<convey-kinetic-text>` (same opt-in `kinetic/` bundle-boundary
+  pattern as `design.ts`'s motion) for an unpracticed instance, gated by a `ConveyPracticeRegistry`
+  (own instance by default, or shared via the `registry` property).
 - `list-item.ts` — `<convey-list-item>`: the weight-aware row primitive (leading/title/subtitle/
   trailing named slots).
 - `navigation-bar.ts` — `<convey-navigation-bar>`: sliding-pill destination switcher, the pill

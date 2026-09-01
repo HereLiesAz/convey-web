@@ -71,6 +71,8 @@ export type { ConveyJob } from './employment.js'
 
 export { ConveyPracticeRegistry, conveyPracticeDecay, decayed, conveyPracticedAffordance } from './practice.js'
 
+export { ConveyActTextElement } from './decoration.js'
+
 export { ConveyAffordance, applyConveyAffordance, ConveyAffordanceElement, conveyInert } from './affordance.js'
 export type { ConveyAffordanceKind, ConveyAffordanceHandle } from './affordance.js'
 
@@ -98,7 +100,7 @@ export { ConveyAvatarElement } from './components/avatar.js'
 export { ConveyListItemElement } from './components/list-item.js'
 export { ConveyCardElement } from './components/card.js'
 
-export { ConveyDesignElement, ConveyDesignSolver, columnWidth } from './components/design.js'
+export { ConveyDesignElement, ConveyDesignPageElement, ConveyDesignSolver, columnWidth } from './components/design.js'
 export type {
   ConveyDesignLevel,
   ConveyDesignAlignment,
