@@ -115,11 +115,17 @@ bit-for-bit from the same Kotlin source:
   (§11.7): multiple blocks (`blocks`, a JS property of line arrays) relate to each other the way
   lines within one block do, reusing `targetColumnFor`/the mirror-fallback rule unchanged rather
   than a separate mechanism, plus height-balancing when a block has fewer lines than the blocks
-  before it. `ConveyDesignSolver` (`solveBlock`/`solvePage`) is pure, dependency-free math,
-  directly unit-tested; the elements take the available width as an explicit `fullWidthSp`
-  property rather than measuring real rendered glyph metrics — see the file's own doc comment for
-  what that means and what replaces it later. Condensation and weight render through real
-  Azrienoch `wdth`/`wght` axes via `fontVariationSettings` (`tokens/type.ts`), not a CSS-transform
+  before it. `ConveyDesignSolver` (`solveBlock`/`solvePage`) is pure, dependency-free math and
+  defaults to `naturalWidth`'s fixed per-character advance-width approximation, which is what
+  `test/design.test.ts` exercises directly (no DOM to measure against there); both `solveBlock`/
+  `solvePage` and `solveToWidth` take an optional trailing `ConveyDesignMeasure` to swap that
+  approximation out. `<convey-design>`/`<convey-design-page>` default their own `measure`
+  property to `createDomMeasurer()` instead — a real, DOM-based measurer (a hidden, off-screen
+  span carrying the exact CSS a solved line will render with, read via
+  `getBoundingClientRect().width`, lazily created once and reused) that falls back to
+  `naturalWidth` outside a real browser (no `document`, or a layout-less environment like jsdom
+  that always reports zero-width rects). Condensation and weight render through real Azrienoch
+  `wdth`/`wght` axes via `fontVariationSettings` (`tokens/type.ts`), not a CSS-transform
   approximation. Each line's `motion` (`'none'`/`'kinetic'`/`'sentence'`, default `'none'`)
   optionally routes it through `<convey-kinetic-text>`/`<convey-kinetic-sentence>` from the
   separate `kinetic/` entry point (created via `document.createElement`, never statically

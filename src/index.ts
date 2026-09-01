@@ -100,7 +100,7 @@ export { ConveyAvatarElement } from './components/avatar.js'
 export { ConveyListItemElement } from './components/list-item.js'
 export { ConveyCardElement } from './components/card.js'
 
-export { ConveyDesignElement, ConveyDesignPageElement, ConveyDesignSolver, columnWidth } from './components/design.js'
+export { ConveyDesignElement, ConveyDesignPageElement, ConveyDesignSolver, columnWidth, createDomMeasurer } from './components/design.js'
 export type {
   ConveyDesignLevel,
   ConveyDesignAlignment,
@@ -109,6 +109,7 @@ export type {
   ConveyDesignLine,
   ConveyDesignAxes,
   ConveyDesignSolvedLine,
+  ConveyDesignMeasure,
 } from './components/design.js'
 export { ConveySegmentedControlElement } from './components/segmented-control.js'
 export { ConveyTopBarElement } from './components/top-bar.js'

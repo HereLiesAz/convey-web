@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { ConveyDesignSolver, columnWidth, type ConveyDesignAxes, type ConveyDesignLine } from '../src/components/design.js'
+import {
+  ConveyDesignSolver,
+  columnWidth,
+  createDomMeasurer,
+  type ConveyDesignAxes,
+  type ConveyDesignLine,
+  type ConveyDesignMeasure,
+} from '../src/components/design.js'
 
 function assertClose(actual: number, expected: number, tolerance = 0.01): void {
   expect(Math.abs(actual - expected)).toBeLessThanOrEqual(tolerance)
@@ -209,5 +216,70 @@ describe('solvePage', () => {
 
     expect(page).toHaveLength(1)
     expect(page[0]).toEqual(block)
+  })
+})
+
+describe('measure injection', () => {
+  // A measure that ignores text/condensation/tracking and returns fontSizeSp verbatim -- chosen
+  // so its output is trivially distinguishable from naturalWidth's (which scales with both
+  // character count and fontSize together), proving solveToWidth actually used the injected
+  // function rather than silently falling back to the default.
+  const identityMeasure: ConveyDesignMeasure = (_text, fontSizeSp) => fontSizeSp
+
+  it('solveToWidth uses an injected measure instead of naturalWidth', () => {
+    const nominal: ConveyDesignAxes = { fontSizeSp: 16, weight: 400, condensation: 100, trackingSp: 0 }
+    const fit = ConveyDesignSolver.solveToWidth('hello world', nominal, 20, { measure: identityMeasure, maxSizeSp: 40 })
+
+    expect(fit).not.toBeNull()
+    assertClose(fit!.fontSizeSp, 20, 1)
+  })
+
+  it('solveBlock uses an injected measure for column carving and column-fill alike', () => {
+    const lines: ConveyDesignLine[] = [
+      { text: 'Defining', level: 'header1', alignment: 'left' },
+      { text: 'Second line', level: 'body', alignment: 'left' },
+    ]
+    const fullWidth = 200
+    const solved = ConveyDesignSolver.solveBlock(lines, fullWidth, undefined, undefined, identityMeasure)
+
+    // The defining line's column should equal identityMeasure's output (its own nominal
+    // fontSize), not naturalWidth's much larger character-scaled estimate.
+    const definingNominalSize = ConveyDesignSolver.nominalSize('header1')
+    assertClose(solved[0]!.column.end, Math.min(definingNominalSize, fullWidth), 1)
+  })
+
+  it('solvePage threads the injected measure through to every block', () => {
+    const block1: ConveyDesignLine[] = [{ text: 'Short', level: 'header1', alignment: 'left' }]
+    const block2: ConveyDesignLine[] = [{ text: 'Also short', level: 'body', alignment: 'left' }]
+    const fullWidth = 200
+
+    const solved = ConveyDesignSolver.solvePage([block1, block2], fullWidth, undefined, undefined, identityMeasure)
+    const definingNominalSize = ConveyDesignSolver.nominalSize('header1')
+    assertClose(solved[0]![0]!.column.end, Math.min(definingNominalSize, fullWidth), 1)
+  })
+})
+
+describe('createDomMeasurer', () => {
+  it('returns 0 for empty text without touching the DOM', () => {
+    const measure = createDomMeasurer()
+    expect(measure('', 16)).toBe(0)
+  })
+
+  it('falls back to naturalWidth in a layout-less environment (jsdom reports zero-width rects)', () => {
+    const measure = createDomMeasurer()
+    const fallback = ConveyDesignSolver.naturalWidth('hello world', 16, 100, 0)
+    expect(measure('hello world', 16, 100, 0)).toBe(fallback)
+  })
+
+  it('reuses one hidden span across calls rather than leaking a new one each time', () => {
+    const countHiddenSpans = () => Array.from(document.body.querySelectorAll('span')).filter((el) => el.style.visibility === 'hidden').length
+    const before = countHiddenSpans()
+
+    const measure = createDomMeasurer()
+    measure('first', 16)
+    measure('second', 16)
+    measure('third', 16)
+
+    expect(countHiddenSpans() - before).toBe(1)
   })
 })

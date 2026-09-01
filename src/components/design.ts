@@ -23,14 +23,20 @@ import { ConveyType, ConveyTypeAxes, fontVariationSettings } from '../tokens/typ
  * exact same column-targeting and mirror-fallback logic rather than a separate mechanism.
  * `<convey-design-page>` is its element.
  *
- * **Implementation status:** {@link ConveyDesignSolver} is pure, dependency-free math, exercised
- * directly by `test/design.test.ts` — it does not depend on the custom elements below. They take
- * the available width as an explicit `fullWidthSp` property (in the same approximate
- * "advance-width units" the solver uses) rather than measuring the actual rendered width of
- * content — real glyph metrics via `Canvas2D`'s `measureText` (or a `ResizeObserver` against
- * real DOM layout) are documented future work, not yet done here. Condensation and weight now
- * render through real Azrienoch variable-font axes (`wdth`/`wght`, via `fontVariationSettings`
- * from `tokens/type.ts`) rather than a `transform: scaleX()` approximation.
+ * **Implementation status:** {@link ConveyDesignSolver}'s functions default to
+ * {@link ConveyDesignSolver.naturalWidth} — a fixed per-character advance-width approximation —
+ * and stay that way for `test/design.test.ts`'s own direct calls (no DOM there to measure
+ * against). `<convey-design>`/`<convey-design-page>` instead default their `measure` property to
+ * {@link createDomMeasurer}, which sizes text against real rendered glyph metrics: a hidden,
+ * off-screen span carrying the exact CSS (`fontFamily`, `fontVariationSettings`, `letterSpacing`)
+ * production rendering uses, measured via `getBoundingClientRect().width`. That span reflects
+ * whatever `wdth`/`wght` point is being tried mid-solve, so the column-fill search converges on
+ * the real rendered width rather than the approximation's guess. `fullWidthSp`, despite the name
+ * kept for backward compatibility, is therefore real CSS pixels once real measurement is active
+ * — the "sp" in every property name is a holdover from the approximate model's own units, not a
+ * unit conversion this file performs. In a non-browser environment (no `document`, or a layout
+ * engine that never reports nonzero rects — jsdom, most test runners) `createDomMeasurer` falls
+ * back to `naturalWidth` per call rather than solving against a permanent zero.
  *
  * **Motion (§4.2 of the manifesto):** every line defaults to `'none'` — static, solved layout
  * only. A line may opt into `'kinetic'` (per-glyph, via `<convey-kinetic-text>`) or `'sentence'`
@@ -126,6 +132,14 @@ function advanceUnits(text: string): number {
   return sum
 }
 
+/**
+ * A pluggable width measurement for §11.4's column-fill solve. Defaults everywhere to
+ * {@link ConveyDesignSolverApi.naturalWidth} (the fixed per-character advance-width
+ * approximation) — pass a real one (see `createDomMeasurer` below) to size against actual
+ * rendered glyph metrics instead.
+ */
+export type ConveyDesignMeasure = (text: string, fontSizeSp: number, condensation?: number, trackingSp?: number) => number
+
 interface ConveyDesignSolverApi {
   readonly DEFAULT_RATIO: number
   readonly DEFAULT_BASE_SIZE_SP: number
@@ -139,10 +153,23 @@ interface ConveyDesignSolverApi {
     text: string,
     nominal: ConveyDesignAxes,
     targetWidth: number,
-    opts?: { minSizeSp?: number; maxSizeSp?: number; minCondensation?: number; maxCondensation?: number; maxTrackingSp?: number },
+    opts?: {
+      minSizeSp?: number
+      maxSizeSp?: number
+      minCondensation?: number
+      maxCondensation?: number
+      maxTrackingSp?: number
+      measure?: ConveyDesignMeasure
+    },
   ): ConveyDesignAxes | null
-  solveBlock(lines: ConveyDesignLine[], fullWidth: number, baseSizeSp?: number, ratio?: number): ConveyDesignSolvedLine[]
-  solvePage(blocks: ConveyDesignLine[][], fullWidth: number, baseSizeSp?: number, ratio?: number): ConveyDesignSolvedLine[][]
+  solveBlock(lines: ConveyDesignLine[], fullWidth: number, baseSizeSp?: number, ratio?: number, measure?: ConveyDesignMeasure): ConveyDesignSolvedLine[]
+  solvePage(
+    blocks: ConveyDesignLine[][],
+    fullWidth: number,
+    baseSizeSp?: number,
+    ratio?: number,
+    measure?: ConveyDesignMeasure,
+  ): ConveyDesignSolvedLine[][]
 }
 
 /** Pure, dependency-free solver math for §11.2–§11.7 of the Design Block spec. */
@@ -191,31 +218,35 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
     text: string,
     nominal: ConveyDesignAxes,
     targetWidth: number,
-    opts: { minSizeSp?: number; maxSizeSp?: number; minCondensation?: number; maxCondensation?: number; maxTrackingSp?: number } = {},
+    opts: {
+      minSizeSp?: number
+      maxSizeSp?: number
+      minCondensation?: number
+      maxCondensation?: number
+      maxTrackingSp?: number
+      measure?: ConveyDesignMeasure
+    } = {},
   ): ConveyDesignAxes | null {
     const minSizeSp = opts.minSizeSp ?? ConveyDesignSolver.MIN_REASONABLE_SIZE_SP
     const maxSizeSp = opts.maxSizeSp ?? nominal.fontSizeSp * 1.5
     const minCondensation = opts.minCondensation ?? ConveyDesignSolver.MIN_CONDENSATION
     const maxCondensation = opts.maxCondensation ?? 100
     const maxTrackingSp = opts.maxTrackingSp ?? 2
+    const measure = opts.measure ?? ConveyDesignSolver.naturalWidth
     const weight = nominal.weight
 
-    const size = bisectForTarget(minSizeSp, maxSizeSp, targetWidth, (s) =>
-      ConveyDesignSolver.naturalWidth(text, s, nominal.condensation, nominal.trackingSp),
-    )
-    let width = ConveyDesignSolver.naturalWidth(text, size, nominal.condensation, nominal.trackingSp)
+    const size = bisectForTarget(minSizeSp, maxSizeSp, targetWidth, (s) => measure(text, s, nominal.condensation, nominal.trackingSp))
+    let width = measure(text, size, nominal.condensation, nominal.trackingSp)
     if (closeEnough(width, targetWidth)) return { fontSizeSp: size, weight, condensation: nominal.condensation, trackingSp: nominal.trackingSp }
 
-    const condensation = bisectForTarget(minCondensation, maxCondensation, targetWidth, (c) =>
-      ConveyDesignSolver.naturalWidth(text, size, c, nominal.trackingSp),
-    )
-    width = ConveyDesignSolver.naturalWidth(text, size, condensation, nominal.trackingSp)
+    const condensation = bisectForTarget(minCondensation, maxCondensation, targetWidth, (c) => measure(text, size, c, nominal.trackingSp))
+    width = measure(text, size, condensation, nominal.trackingSp)
     if (closeEnough(width, targetWidth)) return { fontSizeSp: size, weight, condensation, trackingSp: nominal.trackingSp }
 
     const remaining = targetWidth - width
     const gaps = Math.max(1, text.length - 1)
     const tracking = clamp(nominal.trackingSp + remaining / gaps, -maxTrackingSp, maxTrackingSp)
-    width = ConveyDesignSolver.naturalWidth(text, size, condensation, tracking)
+    width = measure(text, size, condensation, tracking)
 
     return closeEnough(width, targetWidth, 0.12) ? { fontSizeSp: size, weight, condensation, trackingSp: tracking } : null
   },
@@ -225,13 +256,17 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
    * nominal axes, carves the column grid from its own natural width + alignment); every other
    * line without its own `explicitColumn` inherits a target column from it (§11.5) and either
    * fills it (column-fill mode) or, if too narrow even at every lever's extreme, mirrors the
-   * defining line's whole shape to the opposite edge (§11.6).
+   * defining line's whole shape to the opposite edge (§11.6). [measure] defaults to
+   * `naturalWidth`'s fixed advance-width approximation; pass a real one (see `createDomMeasurer`)
+   * to size against actual rendered glyph metrics instead — column carving and column-fill both
+   * use whichever is given, so the two stay consistent with each other.
    */
   solveBlock(
     lines: ConveyDesignLine[],
     fullWidth: number,
     baseSizeSp = ConveyDesignSolver.DEFAULT_BASE_SIZE_SP,
     ratio = ConveyDesignSolver.DEFAULT_RATIO,
+    measure: ConveyDesignMeasure = ConveyDesignSolver.naturalWidth,
   ): ConveyDesignSolvedLine[] {
     if (lines.length === 0) return []
 
@@ -241,7 +276,7 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
       condensation: 100,
       trackingSp: 0,
     }))
-    const naturalWidths = lines.map((line, i) => ConveyDesignSolver.naturalWidth(line.text, nominals[i]!.fontSizeSp))
+    const naturalWidths = lines.map((line, i) => measure(line.text, nominals[i]!.fontSizeSp))
 
     const definingLine = lines[0]!
     const definingWidth = naturalWidths[0]!
@@ -270,14 +305,14 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
         continue
       }
 
-      const fit = ConveyDesignSolver.solveToWidth(line.text, nominal, columnWidth(target))
+      const fit = ConveyDesignSolver.solveToWidth(line.text, nominal, columnWidth(target), { measure })
       if (fit === null) {
         solved.push({ line, axes: definingNominal, naturalWidth: definingWidth, column: mirroredDefiningColumn, mirrored: true })
       } else {
         solved.push({
           line,
           axes: fit,
-          naturalWidth: ConveyDesignSolver.naturalWidth(line.text, fit.fontSizeSp, fit.condensation, fit.trackingSp),
+          naturalWidth: measure(line.text, fit.fontSizeSp, fit.condensation, fit.trackingSp),
           column: target,
           mirrored: false,
         })
@@ -302,11 +337,12 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
     fullWidth: number,
     baseSizeSp = ConveyDesignSolver.DEFAULT_BASE_SIZE_SP,
     ratio = ConveyDesignSolver.DEFAULT_RATIO,
+    measure: ConveyDesignMeasure = ConveyDesignSolver.naturalWidth,
   ): ConveyDesignSolvedLine[][] {
     if (blocks.length === 0) return []
 
     const solvedBlocks: ConveyDesignSolvedLine[][] = []
-    let referenceBlock = ConveyDesignSolver.solveBlock(blocks[0]!, fullWidth, baseSizeSp, ratio)
+    let referenceBlock = ConveyDesignSolver.solveBlock(blocks[0]!, fullWidth, baseSizeSp, ratio, measure)
     solvedBlocks.push(referenceBlock)
     let accumulatedRightEdge = Math.max(...referenceBlock.map((l) => l.column.end))
     let accumulatedHeight = referenceBlock.reduce((sum, l) => sum + l.axes.fontSizeSp, 0)
@@ -317,7 +353,7 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
 
       let solved: ConveyDesignSolvedLine[]
       if (spansFull) {
-        solved = ConveyDesignSolver.solveBlock(blockLines, fullWidth, baseSizeSp, ratio)
+        solved = ConveyDesignSolver.solveBlock(blockLines, fullWidth, baseSizeSp, ratio, measure)
       } else {
         const anchorLine = referenceBlock[0]!.line
         const anchorColumn = referenceBlock[0]!.column
@@ -327,9 +363,9 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
         if (tooNarrow) {
           const bounds = boundingColumn(referenceBlock)
           const mirroredColumn: ConveyDesignColumn = { start: fullWidth - bounds.end, end: fullWidth - bounds.start }
-          solved = solveBlockWithinColumn(blockLines, mirroredColumn, baseSizeSp, ratio).map((l) => ({ ...l, mirrored: true }))
+          solved = solveBlockWithinColumn(blockLines, mirroredColumn, baseSizeSp, ratio, measure).map((l) => ({ ...l, mirrored: true }))
         } else {
-          solved = solveBlockWithinColumn(blockLines, target!, baseSizeSp, ratio)
+          solved = solveBlockWithinColumn(blockLines, target!, baseSizeSp, ratio, measure)
         }
       }
 
@@ -356,14 +392,63 @@ export const ConveyDesignSolver: ConveyDesignSolverApi = {
 }
 
 /** Solves `lines` against `column`'s own width, then offsets every result back into `column`'s absolute position — the block-level counterpart of a line filling an inherited column. */
-function solveBlockWithinColumn(lines: ConveyDesignLine[], column: ConveyDesignColumn, baseSizeSp: number, ratio: number): ConveyDesignSolvedLine[] {
-  const relative = ConveyDesignSolver.solveBlock(lines, columnWidth(column), baseSizeSp, ratio)
+function solveBlockWithinColumn(
+  lines: ConveyDesignLine[],
+  column: ConveyDesignColumn,
+  baseSizeSp: number,
+  ratio: number,
+  measure: ConveyDesignMeasure,
+): ConveyDesignSolvedLine[] {
+  const relative = ConveyDesignSolver.solveBlock(lines, columnWidth(column), baseSizeSp, ratio, measure)
   return relative.map((l) => ({ ...l, column: { start: column.start + l.column.start, end: column.start + l.column.end } }))
 }
 
 /** The smallest column spanning every line's own column in `block` — that block's "whole shape," for the mirror-fallback rule promoted to block level. */
 function boundingColumn(block: ConveyDesignSolvedLine[]): ConveyDesignColumn {
   return { start: Math.min(...block.map((l) => l.column.start)), end: Math.max(...block.map((l) => l.column.end)) }
+}
+
+/**
+ * Builds a real, DOM-based {@link ConveyDesignMeasure}: a hidden, off-screen, `white-space: pre`
+ * span carrying the exact CSS (`fontFamily`, `fontVariationSettings`'s `wdth`, `letterSpacing`)
+ * a solved line will actually render with, measured via `getBoundingClientRect().width`. `wght`
+ * is deliberately left at the browser default rather than varied per call — `naturalWidth`'s own
+ * model treats weight as changing a glyph's ink, not its advance width (§11.3), and this real
+ * measurer stays consistent with that rather than introducing a second, contradictory notion of
+ * what weight does to a line's width.
+ *
+ * Lazily creates and reuses one span (appended to `document.body` on first use) rather than one
+ * per call — `solveToWidth`'s binary search calls this dozens of times per line. Falls back to
+ * `naturalWidth` when `document` is unavailable, or when the measured rect comes back zero-width
+ * for genuinely non-empty text — the signal a layout-less environment (jsdom, most test runners)
+ * gives, rather than something a real browser would ever report for rendered text.
+ */
+export function createDomMeasurer(): ConveyDesignMeasure {
+  let span: HTMLElement | null = null
+
+  return (text: string, fontSizeSp: number, condensation = 100, trackingSp = 0): number => {
+    if (text.length === 0) return 0
+    if (typeof document === 'undefined') return ConveyDesignSolver.naturalWidth(text, fontSizeSp, condensation, trackingSp)
+
+    if (span === null) {
+      span = document.createElement('span')
+      span.style.position = 'absolute'
+      span.style.visibility = 'hidden'
+      span.style.whiteSpace = 'pre'
+      span.style.left = '-99999px'
+      span.style.top = '0'
+      span.style.fontFamily = `'${ConveyType.FontFamily}'`
+      document.body.appendChild(span)
+    }
+
+    span.textContent = text
+    span.style.fontSize = `${fontSizeSp}px`
+    span.style.letterSpacing = `${trackingSp}px`
+    ;(span.style as CSSStyleDeclaration & { fontVariationSettings: string }).fontVariationSettings = fontVariationSettings({ Width: condensation })
+
+    const width = span.getBoundingClientRect().width
+    return width > 0 ? width : ConveyDesignSolver.naturalWidth(text, fontSizeSp, condensation, trackingSp)
+  }
 }
 
 function bisectForTarget(lo: number, hi: number, target: number, widthOf: (v: number) => number): number {
@@ -443,6 +528,7 @@ export class ConveyDesignElement extends HTMLElement {
   #baseSizeSp = ConveyDesignSolver.DEFAULT_BASE_SIZE_SP
   #ratio = ConveyDesignSolver.DEFAULT_RATIO
   #color: string = ConveyColor.OnSurface
+  #measure: ConveyDesignMeasure = createDomMeasurer()
 
   constructor() {
     super()
@@ -502,8 +588,17 @@ export class ConveyDesignElement extends HTMLElement {
     if (this.isConnected) this.#render()
   }
 
+  /** Defaults to {@link createDomMeasurer}'s real, DOM-based measurement. Override to pin a specific measurer (e.g. `ConveyDesignSolver.naturalWidth` to force the approximation, matching `test/design.test.ts`'s own calls). */
+  get measure(): ConveyDesignMeasure {
+    return this.#measure
+  }
+  set measure(value: ConveyDesignMeasure) {
+    this.#measure = value
+    if (this.isConnected) this.#render()
+  }
+
   #render(): void {
-    const solved = ConveyDesignSolver.solveBlock(this.#lines, this.#fullWidthSp, this.#baseSizeSp, this.#ratio)
+    const solved = ConveyDesignSolver.solveBlock(this.#lines, this.#fullWidthSp, this.#baseSizeSp, this.#ratio, this.#measure)
     this.#container.innerHTML = ''
     for (const solvedLine of solved) this.#container.appendChild(createSolvedLineRow(solvedLine, this.#color))
   }
@@ -580,6 +675,7 @@ export class ConveyDesignPageElement extends HTMLElement {
   #ratio = ConveyDesignSolver.DEFAULT_RATIO
   #color: string = ConveyColor.OnSurface
   #blockSpacingPx = 24
+  #measure: ConveyDesignMeasure = createDomMeasurer()
 
   constructor() {
     super()
@@ -647,8 +743,17 @@ export class ConveyDesignPageElement extends HTMLElement {
     if (this.isConnected) this.#render()
   }
 
+  /** See `<convey-design>`'s own `measure` property doc. */
+  get measure(): ConveyDesignMeasure {
+    return this.#measure
+  }
+  set measure(value: ConveyDesignMeasure) {
+    this.#measure = value
+    if (this.isConnected) this.#render()
+  }
+
   #render(): void {
-    const solvedBlocks = ConveyDesignSolver.solvePage(this.#blocks, this.#fullWidthSp, this.#baseSizeSp, this.#ratio)
+    const solvedBlocks = ConveyDesignSolver.solvePage(this.#blocks, this.#fullWidthSp, this.#baseSizeSp, this.#ratio, this.#measure)
     this.#container.innerHTML = ''
 
     solvedBlocks.forEach((solvedBlock, i) => {
