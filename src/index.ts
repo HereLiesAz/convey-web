@@ -97,6 +97,17 @@ export { ConveySwitchElement } from './components/switch.js'
 export { ConveyAvatarElement } from './components/avatar.js'
 export { ConveyListItemElement } from './components/list-item.js'
 export { ConveyCardElement } from './components/card.js'
+
+export { ConveyDesignElement, ConveyDesignSolver, columnWidth } from './components/design.js'
+export type {
+  ConveyDesignLevel,
+  ConveyDesignAlignment,
+  ConveyDesignMotion,
+  ConveyDesignColumn,
+  ConveyDesignLine,
+  ConveyDesignAxes,
+  ConveyDesignSolvedLine,
+} from './components/design.js'
 export { ConveySegmentedControlElement } from './components/segmented-control.js'
 export { ConveyTopBarElement } from './components/top-bar.js'
 export { ConveyNavigationBarElement } from './components/navigation-bar.js'

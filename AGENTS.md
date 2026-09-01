@@ -106,6 +106,19 @@ bit-for-bit from the same Kotlin source:
   `box-shadow` (`0px` collapses to `none`, not a zero-blur shadow that still paints).
 - `chip.ts` — `<convey-chip>`: selectable tag, morphs background/content color on `selected`;
   `convey-remove` is deliberately not wired to any removal mechanism itself.
+- `design.ts` — `<convey-design>` / `ConveyDesignSolver`: Part XI of the Conveyance Manifesto
+  ("The Design Block") — automatic composition for a block of semantic-level text lines
+  (`title`/`header1`/`header2`/`header3`/`body`), solving size/weight/condensation/tracking so
+  the block's silhouette reads as balanced (hierarchy-balance mode for freestanding lines,
+  column-fill mode plus the column-targeting/mirror-fallback rules for lines in a column
+  relationship). `ConveyDesignSolver` is pure, dependency-free math, directly unit-tested; the
+  element itself takes the block's width as an explicit `fullWidthSp` property rather than
+  measuring real rendered glyph metrics — see the file's own doc comment for what that means and
+  what replaces it later. Each line's `motion` (`'none'`/`'kinetic'`/`'sentence'`, default
+  `'none'`) optionally routes it through `<convey-kinetic-text>`/`<convey-kinetic-sentence>` from
+  the separate `kinetic/` entry point (created via `document.createElement`, never statically
+  imported, so this stays in the main bundle) — per §4.2 of the manifesto, text animation is
+  offered, never assumed.
 - `list-item.ts` — `<convey-list-item>`: the weight-aware row primitive (leading/title/subtitle/
   trailing named slots).
 - `navigation-bar.ts` — `<convey-navigation-bar>`: sliding-pill destination switcher, the pill
