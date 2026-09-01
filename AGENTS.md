@@ -23,9 +23,10 @@ disagree.
 
 [`demo/index.html`](demo/index.html) is a plain, framework-free HTML page exercising every
 component and mechanism in this package — tokens, weight enforcement, all nine visual
-components, Escort/Reversal/Yield/Migration/Offer, affordance/interaction/life, and (behind an
-explicit "Load kinetic engine" button, since its data is ~4MB gzipped) the kinetic-typography
-layer: a live `<convey-kinetic-text>`, a `<convey-kinetic-sentence>` with an editable sentence
+components, Escort/Reversal/Yield/Migration/Offer, affordance/interaction/life, and the
+kinetic-typography layer — its ~4MB-gzipped data starts fetching automatically on page load (no
+button to click), with the demos below activating live once it resolves: a live
+`<convey-kinetic-text>`, a `<convey-kinetic-sentence>` with an editable sentence
 input showing each word's real classification, and a `<convey-svo-scene>` with an editable
 sentence and four example buttons demonstrating different verb-timeline shapes (continuous
 Motion, MannerAgent, Contact, and a no-motion Emotion fallback) — including one documented

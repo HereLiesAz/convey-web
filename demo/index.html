@@ -716,20 +716,13 @@
         kinetic typography and a from-scratch 2D force-physics simulation. Not a lookup table of
         curated words — the same generator that ported this data faithfully reproduces the
         Compose Multiplatform sibling library's classification for any English verb or noun.
-        Opt-in on purpose: this data is ~4MB gzipped, so it loads only when you ask.
+        Loading the WordNet-derived verb (~1.5MB) and noun (~10MB) lexicon data now, in the
+        background (~4MB gzipped over the wire) — the demos below activate as soon as it's ready.
       </p>
-    </div>
-    <div class="demo-box" id="kinetic-loader" style="text-align:center;">
-      <div class="label">Load the kinetic engine</div>
-      <p style="color:var(--on-surface-variant); font-size:13px; max-width:520px; margin:0 auto 16px;">
-        Downloads the WordNet-derived verb (~1.5MB) and noun (~10MB) lexicon data — about 4MB
-        gzipped over the wire — then classifies every word below in your browser, live.
-      </p>
-      <button class="btn primary" id="kinetic-load-btn">Load kinetic engine (~4MB)</button>
-      <div class="log-line" id="kinetic-load-log" style="margin-top:12px;"></div>
+      <div class="log-line" id="kinetic-load-log">Loading kinetic engine…</div>
     </div>
 
-    <div id="kinetic-demos" hidden>
+    <div id="kinetic-demos">
       <div class="card-grid" style="margin-bottom:16px;">
         <div class="demo-box">
           <div class="label">convey-kinetic-text — per-glyph idle motion + burst</div>
@@ -965,37 +958,27 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
   burstTile.addEventListener('click', () => triggerConveyLifeBurst(burstTile))
 
   // ── Kinetic typography ─────────────────────────────────────────────
-  const kineticLoadBtn = document.getElementById('kinetic-load-btn')
-  const kineticLoadLog = document.getElementById('kinetic-load-log')
-  const kineticLoader = document.getElementById('kinetic-loader')
-  const kineticDemos = document.getElementById('kinetic-demos')
+  // convey-kinetic-text needs no lexicon data (it's plain per-glyph ConveyLife motion), so it
+  // wires up immediately rather than waiting on the verb/noun fetch below.
+  const ktDemo = document.getElementById('kt-demo')
+  ktDemo.idle = ConveyLife.Wobble({ period: 3000, skewDegrees: 3 })
+  ktDemo.addEventListener('convey-click', () => ktDemo.triggerBurst())
 
-  kineticLoadBtn.addEventListener('click', async () => {
-    kineticLoadBtn.disabled = true
-    kineticLoadBtn.textContent = 'Loading…'
-    kineticLoadLog.textContent = 'Fetching verb + noun lexicon data…'
+  const kineticLoadLog = document.getElementById('kinetic-load-log')
+  ;(async () => {
     const started = performance.now()
     try {
       const kinetic = await import('./kinetic.js')
       await Promise.all([kinetic.loadConveyVerbData(), kinetic.loadConveyNounData()])
       const seconds = ((performance.now() - started) / 1000).toFixed(1)
-      kineticLoadLog.textContent = `Loaded in ${seconds}s.`
-      kineticLoader.hidden = true
-      kineticDemos.hidden = false
+      kineticLoadLog.textContent = `Kinetic engine loaded in ${seconds}s — real WordNet/VerbNet classification is now live below.`
       wireKineticDemos(kinetic)
     } catch (err) {
-      kineticLoadLog.textContent = `Failed to load: ${err.message}`
-      kineticLoadBtn.disabled = false
-      kineticLoadBtn.textContent = 'Retry'
+      kineticLoadLog.textContent = `Failed to load the kinetic engine: ${err.message}`
     }
-  })
+  })()
 
   function wireKineticDemos(kinetic) {
-    // convey-kinetic-text
-    const ktDemo = document.getElementById('kt-demo')
-    ktDemo.idle = ConveyLife.Wobble({ period: 3000, skewDegrees: 3 })
-    ktDemo.addEventListener('convey-click', () => ktDemo.triggerBurst())
-
     // convey-kinetic-sentence
     const sentenceInput = document.getElementById('sentence-input')
     const sentenceDemo = document.getElementById('sentence-demo')
