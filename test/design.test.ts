@@ -1,0 +1,155 @@
+import { describe, expect, it } from 'vitest'
+import { ConveyDesignSolver, columnWidth, type ConveyDesignAxes, type ConveyDesignLine } from '../src/components/design.js'
+
+function assertClose(actual: number, expected: number, tolerance = 0.01): void {
+  expect(Math.abs(actual - expected)).toBeLessThanOrEqual(tolerance)
+}
+
+describe('nominalSize', () => {
+  it('is monotonic across levels', () => {
+    const body = ConveyDesignSolver.nominalSize('body')
+    const h3 = ConveyDesignSolver.nominalSize('header3')
+    const h2 = ConveyDesignSolver.nominalSize('header2')
+    const h1 = ConveyDesignSolver.nominalSize('header1')
+    const title = ConveyDesignSolver.nominalSize('title')
+    expect(body).toBeLessThan(h3)
+    expect(h3).toBeLessThan(h2)
+    expect(h2).toBeLessThan(h1)
+    expect(h1).toBeLessThan(title)
+  })
+
+  it('falls out of one modular-scale ratio', () => {
+    const base = 16
+    const ratio = 1.333
+    expect(ConveyDesignSolver.nominalSize('body', base, ratio)).toBe(base)
+    assertClose(ConveyDesignSolver.nominalSize('header3', base, ratio), base * ratio)
+    assertClose(ConveyDesignSolver.nominalSize('title', base, ratio), base * ratio ** 4, 0.05)
+  })
+})
+
+describe('nominalWeight', () => {
+  it('is monotonic across levels', () => {
+    expect(ConveyDesignSolver.nominalWeight('body')).toBeLessThan(ConveyDesignSolver.nominalWeight('header3'))
+    expect(ConveyDesignSolver.nominalWeight('header1')).toBeLessThan(ConveyDesignSolver.nominalWeight('title'))
+  })
+})
+
+describe('inkScore', () => {
+  it('scales with the square of font size', () => {
+    const small = ConveyDesignSolver.inkScore('hello', 10, 400)
+    const big = ConveyDesignSolver.inkScore('hello', 20, 400)
+    assertClose(big / small, 4)
+  })
+
+  it('scales with the stroke weight factor', () => {
+    const regular = ConveyDesignSolver.inkScore('hello', 16, 400)
+    const bold = ConveyDesignSolver.inkScore('hello', 16, 800)
+    assertClose(bold / regular, 2)
+  })
+})
+
+describe('naturalWidth', () => {
+  it('grows linearly with font size', () => {
+    const narrow = ConveyDesignSolver.naturalWidth('hello world', 10)
+    const wide = ConveyDesignSolver.naturalWidth('hello world', 20)
+    assertClose(wide / narrow, 2)
+  })
+
+  it('shrinks with condensation', () => {
+    const normal = ConveyDesignSolver.naturalWidth('hello world', 16, 100)
+    const condensed = ConveyDesignSolver.naturalWidth('hello world', 16, 75)
+    expect(condensed).toBeLessThan(normal)
+  })
+})
+
+describe('solveToWidth', () => {
+  it('reaches a close width within lever bounds', () => {
+    const nominal: ConveyDesignAxes = { fontSizeSp: 16, weight: 400, condensation: 100, trackingSp: 0 }
+    const target = 180
+    const fit = ConveyDesignSolver.solveToWidth('a modest headline', nominal, target)
+    expect(fit).not.toBeNull()
+    const actual = ConveyDesignSolver.naturalWidth('a modest headline', fit!.fontSizeSp, fit!.condensation, fit!.trackingSp)
+    expect(Math.abs(actual - target)).toBeLessThanOrEqual(target * 0.12)
+  })
+})
+
+describe('solveBlock', () => {
+  it('renders a single freestanding line at nominal axes', () => {
+    const lines: ConveyDesignLine[] = [{ text: 'Only line', level: 'title', alignment: 'left' }]
+    const solved = ConveyDesignSolver.solveBlock(lines, 400)
+
+    expect(solved).toHaveLength(1)
+    expect(solved[0].axes.fontSizeSp).toBe(ConveyDesignSolver.nominalSize('title'))
+    expect(solved[0].mirrored).toBe(false)
+  })
+
+  it('has the second line inherit the leftover column from a left-aligned defining line', () => {
+    const lines: ConveyDesignLine[] = [
+      { text: 'Co', level: 'header1', alignment: 'left' },
+      { text: 'A modest location name', level: 'body', alignment: 'left' },
+    ]
+    const fullWidth = 500
+    const solved = ConveyDesignSolver.solveBlock(lines, fullWidth)
+
+    const definingColumn = solved[0].column
+    const second = solved[1]
+    if (!second.mirrored) {
+      assertClose(second.column.start, definingColumn.end)
+      assertClose(second.column.end, fullWidth)
+    }
+  })
+
+  it('triggers the mirror-fallback rule when the leftover column is too narrow', () => {
+    const lines: ConveyDesignLine[] = [
+      { text: 'A rather long title that spans most of the available width already', level: 'title', alignment: 'left' },
+      { text: 'Another full sentence of real content', level: 'body', alignment: 'left' },
+    ]
+    const fullWidth = 320
+    const solved = ConveyDesignSolver.solveBlock(lines, fullWidth)
+
+    const second = solved[1]
+    expect(second.mirrored).toBe(true)
+    const definingColumn = solved[0].column
+    assertClose(second.column.start, fullWidth - definingColumn.end)
+    assertClose(second.column.end, fullWidth - definingColumn.start)
+  })
+
+  it('makes the next line fill full width too when the defining line is justified', () => {
+    const lines: ConveyDesignLine[] = [
+      { text: 'A full-width justified headline here', level: 'title', alignment: 'justify' },
+      { text: 'Subtitle', level: 'body', alignment: 'left' },
+    ]
+    const fullWidth = 400
+    const solved = ConveyDesignSolver.solveBlock(lines, fullWidth)
+
+    expect(solved[0].column.start).toBe(0)
+    expect(solved[0].column.end).toBe(fullWidth)
+    if (!solved[1].mirrored) {
+      assertClose(solved[1].column.start, 0)
+      assertClose(solved[1].column.end, fullWidth)
+    }
+  })
+
+  it('lets an explicit column override inheritance', () => {
+    const explicit = { start: 50, end: 150 }
+    const lines: ConveyDesignLine[] = [
+      { text: 'Tag', level: 'header1', alignment: 'left' },
+      { text: 'Explicit', level: 'body', alignment: 'left', explicitColumn: explicit },
+    ]
+    const solved = ConveyDesignSolver.solveBlock(lines, 400)
+
+    if (!solved[1].mirrored) {
+      expect(solved[1].column).toEqual(explicit)
+    }
+  })
+})
+
+describe('columnWidth', () => {
+  it('returns the span between start and end', () => {
+    expect(columnWidth({ start: 10, end: 60 })).toBe(50)
+  })
+
+  it('never goes negative', () => {
+    expect(columnWidth({ start: 60, end: 10 })).toBe(0)
+  })
+})
