@@ -153,3 +153,61 @@ describe('columnWidth', () => {
     expect(columnWidth({ start: 60, end: 10 })).toBe(0)
   })
 })
+
+describe('solvePage', () => {
+  it('makes the second block treat the full screen as its measure when the first block does not span it', () => {
+    const fullWidth = 500
+    const block1: ConveyDesignLine[] = [{ text: 'Co', level: 'header1', alignment: 'left' }]
+    const block2: ConveyDesignLine[] = [{ text: 'A modest location name', level: 'body', alignment: 'left' }]
+
+    const solved = ConveyDesignSolver.solvePage([block1, block2], fullWidth)
+    expect(solved).toHaveLength(2)
+
+    const block1RightEdge = Math.max(...solved[0]!.map((l) => l.column.end))
+    const secondBlockFirstLine = solved[1]![0]!
+    if (!secondBlockFirstLine.mirrored) {
+      assertClose(secondBlockFirstLine.column.start, block1RightEdge)
+    }
+  })
+
+  it('mirrors the whole prior block when the leftover is too narrow', () => {
+    // Chosen so block 1's own natural width leaves a real but small (<15% of fullWidth)
+    // leftover, triggering the mirror-fallback rather than the ordinary column-fill path.
+    const fullWidth = 320
+    const block1: ConveyDesignLine[] = [{ text: 'A short line', level: 'title', alignment: 'left' }]
+    const block2: ConveyDesignLine[] = [{ text: 'Another full sentence of real content', level: 'body', alignment: 'left' }]
+
+    const solved = ConveyDesignSolver.solvePage([block1, block2], fullWidth)
+    expect(solved[1]![0]!.mirrored).toBe(true)
+  })
+
+  it('balances a shorter block\'s height toward the prior block\'s height', () => {
+    const fullWidth = 400
+    const threeLineBlock: ConveyDesignLine[] = [
+      { text: 'Tagline here', level: 'header2', alignment: 'justify' },
+      { text: 'Company Name', level: 'title', alignment: 'justify' },
+      { text: 'Location', level: 'body', alignment: 'justify' },
+    ]
+    const twoLineBlock: ConveyDesignLine[] = [
+      { text: 'Short', level: 'body', alignment: 'justify' },
+      { text: 'Two', level: 'body', alignment: 'justify' },
+    ]
+
+    const solved = ConveyDesignSolver.solvePage([threeLineBlock, twoLineBlock], fullWidth)
+    const threeLineHeight = solved[0]!.reduce((sum, l) => sum + l.axes.fontSizeSp, 0)
+    const twoLineHeightUnbalanced = twoLineBlock.reduce((sum, l) => sum + ConveyDesignSolver.nominalSize(l.level ?? 'body'), 0)
+    const twoLineHeightBalanced = solved[1]!.reduce((sum, l) => sum + l.axes.fontSizeSp, 0)
+
+    expect(Math.abs(twoLineHeightBalanced - threeLineHeight)).toBeLessThan(Math.abs(twoLineHeightUnbalanced - threeLineHeight))
+  })
+
+  it('matches solveBlock on a single block', () => {
+    const fullWidth = 400
+    const lines: ConveyDesignLine[] = [{ text: 'Only block', level: 'title', alignment: 'left' }]
+    const page = ConveyDesignSolver.solvePage([lines], fullWidth)
+    const block = ConveyDesignSolver.solveBlock(lines, fullWidth)
+
+    expect(page).toHaveLength(1)
+    expect(page[0]).toEqual(block)
+  })
+})
