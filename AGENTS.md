@@ -224,6 +224,18 @@ And the remaining supporting primitives, completing `convey`'s enforcement/motio
 - `life.ts` — `ConveyLife`/`applyConveyLife`/`triggerConveyLifeBurst`: continuous idle motion
   (Breathe/Twinkle/Wobble) for chrome that should never look inert, distinct from
   `ConveyAffordance` (teaches once, then stops) — `ConveyLife` never stops on its own.
+- `scroll-parallax.ts` — `ConveyScrollParallax`/`ConveyScrollParallaxController`: Part XII
+  (§12.5, "The Body Block") of the Conveyance Manifesto's scroll-linked-animation
+  infrastructure — genuinely new, not a port of anything that already existed on either
+  platform. `ConveyScrollParallax` is pure, dependency-free math (`entranceProgress`/
+  `translation`) identical in shape to `convey`'s own `ConveyScrollParallax.kt`, so both
+  platforms agree on what "entrance progress" means even though their rendering mechanics
+  differ. `ConveyScrollParallaxController` owns one scrolling container's effect for every
+  registered item: a single rAF-throttled `scroll` listener reads each item's live
+  `getBoundingClientRect()` against the container's own and writes `transform`/`opacity`
+  directly, skipping any framework re-render — the same "read position, write a transform"
+  discipline `convey`'s `Modifier.conveyScrollParallax` gets from `graphicsLayer`'s draw-phase
+  state reads.
 
 ### `kinetic/` — the WordNet+VerbNet-backed kinetic-typography layer
 
@@ -264,6 +276,26 @@ data — same discipline `convey`'s own Kotlin data follows).
   subject toward the object (translate, collide, squash/stretch, gait bob/tilt for an animate
   subject). Falls back to `<convey-kinetic-sentence>` when the heuristic can't split the
   sentence or the verb has no spatial component.
+- `body.ts` — `<convey-body>`/`ConveyBodyClassifier`: Part XII (§12.5) of the Conveyance
+  Manifesto, "The Body Block" — a body-prose sibling to `design.ts`'s heading-hierarchy
+  primitive, for `paragraph`/`quote` roles rather than semantic levels. Additive only (never
+  overrides conventional semantic delegation) and mandatory rather than opt-in: every word
+  inside a `<convey-body>` gets one classification pass (reusing `ConveyVerbLexicon`/
+  `ConveyNounLexicon`, the same WordNet+VerbNet engine `kinetic-text.ts` already uses) that
+  drives both its idle motion (`toConveyLife()`, unchanged from `kinetic-text.ts`'s own
+  mapping — "one motion grammar for text, not two") and its font weight, fluidly per word
+  rather than fixed per level (`ConveyBodyClassifier.verbWeightDelta`/`nounWeightDelta` are a
+  deliberate, coarse three-bucket judgment call, same spirit as `design.ts`'s own
+  `inkScore` — not empirically validated). Each line also gets a mandatory §12.5 scroll-linked
+  parallax entrance via `scroll-parallax.ts`, direction keyed to role: `paragraph` enters
+  horizontal, `quote` vertical. `<convey-body>` brings its own scroll container (an internal
+  `.viewport` div wired to a `ConveyScrollParallaxController`) rather than reading an
+  externally-supplied scroll state. Unlike `design.ts`'s motion (optional, only opportunistically
+  touching the kinetic bundle via a runtime `customElements.get()` check), classification here
+  is load-bearing for the block's own layout, so `body.ts` lives in the `kinetic/` entry point
+  as a hard dependency, not the main bundle — matching the async-data reality below: it renders
+  plain text immediately, then re-renders once `Promise.all([loadConveyVerbData(),
+  loadConveyNounData()])` resolves.
 
 The data-generation pipeline (`scripts/generate-lexicon-data.mjs`) is a from-scratch
 reconstruction of `convey`'s own (undocumented, not-checked-into-that-repo) `codegen.py` --
@@ -307,9 +339,11 @@ Employment (Law 4)/Practice-decay (§6.3) enforcement, the remaining supporting 
 `ConveyAffordance`, `ConveyInteraction`, `ConveyTransform`, `ConveyMorph`, `ConveyLife` — and
 now the WordNet/VerbNet-backed kinetic-typography layer (`ConveyVerbLexicon`/`ConveyNounLexicon`,
 the pure-math force-physics primitives, `<convey-kinetic-text>`/`<convey-kinetic-sentence>`/
-`<convey-svo-scene>`) as a separate `@hereliesaz/convey-web/kinetic` entry point, and
-`ConveyType` — this library's official typeface (Azrienoch, a multiplex variable font) — 253
-tests, `npm run build` and `npm test` both pass clean, 0 `npm audit` vulnerabilities.
+`<convey-svo-scene>`) as a separate `@hereliesaz/convey-web/kinetic` entry point,
+`ConveyType` — this library's official typeface (Azrienoch, a multiplex variable font),
+the from-scratch scroll-linked-animation infrastructure (`scroll-parallax.ts`), and Part XII's
+`<convey-body>` (`kinetic/body.ts`) — 302 tests, `npm run build` and `npm test` both pass
+clean, 0 `npm audit` vulnerabilities.
 
 **Not yet done:** nothing from `convey`'s current inventory — every mechanism/enforcement
 primitive and the kinetic-typography layer are now ported. Two honest, documented gaps within
