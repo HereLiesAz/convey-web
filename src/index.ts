@@ -73,6 +73,9 @@ export { ConveyPracticeRegistry, conveyPracticeDecay, decayed, conveyPracticedAf
 
 export { ConveyActTextElement } from './decoration.js'
 
+export { ConveyScrollParallax, ConveyScrollParallaxController } from './scroll-parallax.js'
+export type { ConveyParallaxDirection, ConveyScrollParallaxItem } from './scroll-parallax.js'
+
 export { ConveyAffordance, applyConveyAffordance, ConveyAffordanceElement, conveyInert } from './affordance.js'
 export type { ConveyAffordanceKind, ConveyAffordanceHandle } from './affordance.js'
 

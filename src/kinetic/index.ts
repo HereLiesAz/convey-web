@@ -48,3 +48,6 @@ export {
 export { ConveyKineticTextElement, ConveyKineticSentenceElement } from './kinetic-text.js'
 export { ConveySvoSceneElement, parseSvoHeuristic } from './svo-scene.js'
 export type { ConveySvoParts } from './svo-scene.js'
+
+export { ConveyBodyElement, ConveyBodyClassifier } from './body.js'
+export type { ConveyBodyRole, ConveyBodyLine, ConveyBodyWordClassification } from './body.js'
