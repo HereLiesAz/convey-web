@@ -461,6 +461,11 @@
       <div class="label">ConveyShape</div>
       <div class="shape-row" id="shape-row"></div>
     </div>
+    <div class="demo-box" style="margin-bottom: 16px;">
+      <div class="label">ConveyExpressiveShape — the real M3 Expressive polygon vocabulary</div>
+      <div class="shape-row" id="expressive-shape-row" style="min-height: 56px;"></div>
+      <div class="note">Wraps <a href="https://github.com/ruanspies/material-shapes-ts">material-shapes-ts</a>, a faithful port of AndroidX Graphics Shapes — the same geometry <code>convey</code>'s own Kotlin <code>ConveyExpressiveShape</code> ports directly.</div>
+    </div>
     <div class="demo-box">
       <div class="label">ConveyType — Azrienoch</div>
       <div id="type-specimen" style="font-size: 40px; line-height: 1.2; margin-bottom: 20px; font-family: 'Azrienoch', sans-serif;">Conveyance</div>
@@ -842,6 +847,7 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
     ConveyTypeAxes,
     ConveyTypePreset,
     fontVariationSettings,
+    ConveyExpressiveShape,
   } from './convey-web.js'
 
   // ── Shapes ──────────────────────────────────────────────────────────
@@ -859,6 +865,25 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
     wrap.appendChild(label)
     shapeRow.appendChild(wrap)
   }
+
+  // ── Expressive shapes (Part XII-adjacent: the real M3 Expressive polygons) ─────
+  ConveyExpressiveShape.ensureLoaded().then(() => {
+    const expressiveRow = document.getElementById('expressive-shape-row')
+    for (const name of ['cookie9Sided', 'sunny', 'pill', 'heart', 'clover4Leaf', 'burst']) {
+      const wrap = document.createElement('div')
+      const sample = document.createElement('div')
+      sample.className = 'shape-sample'
+      sample.style.background = 'var(--primary)'
+      const token = ConveyExpressiveShape.shapeOf(name)
+      sample.style.clipPath = token.clipPath
+      const label = document.createElement('div')
+      label.className = 'shape-sample-label'
+      label.textContent = name
+      wrap.appendChild(sample)
+      wrap.appendChild(label)
+      expressiveRow.appendChild(wrap)
+    }
+  })
 
   // ── Type (Azrienoch) ───────────────────────────────────────────────
   const typeSpecimen = document.getElementById('type-specimen')

@@ -14,6 +14,8 @@ export type { AnimationSpec, SpringSpec, TweenSpec, SnapSpec } from './tokens/mo
 export { ConveyShape, shapeScale, escalate, deescalate, applyShape } from './tokens/shape.js'
 export type { ConveyShapeToken } from './tokens/shape.js'
 
+export { ConveyExpressiveShape } from './tokens/expressive-shape.js'
+
 export { ConveyColor, cssVariables, toCssVariableBlock, containerFor, contentFor } from './tokens/color.js'
 
 export { ConveySize } from './tokens/size.js'
