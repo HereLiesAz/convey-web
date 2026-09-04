@@ -63,6 +63,17 @@ same enforcement rules, ported vocabulary rather than a fresh design:
 - `tokens/shape.ts` — `ConveyShape`: the same radius/chamfer hierarchy as `ConveyShape.kt`, as CSS
   `border-radius` values (or `clip-path` polygons for the chamfered `Cut`/`CutSmall` shapes, which
   `border-radius` cannot express).
+- `tokens/expressive-shape.ts` — `ConveyExpressiveShape`: the web counterpart to convey's own
+  `ConveyExpressiveShape.kt` — the real M3 Expressive 35-polygon shape vocabulary. Rather than
+  reimplementing AndroidX Graphics Shapes' rounded-polygon-to-cubic-curve geometry engine from
+  scratch in TypeScript, this wraps [`material-shapes-ts`](https://github.com/ruanspies/material-shapes-ts)
+  (Apache 2.0, zero runtime dependencies) — an existing, faithful TS port of that same AndroidX
+  source. Verified for real: rendered several of its shapes (circle, heart, cookie9Sided, sunny,
+  pill, clover4Leaf, burst) in headless Chromium and confirmed the output visually matches the
+  same shapes rendered by `convey`'s own Kotlin port. CSS `clip-path: path(...)` doesn't scale
+  path data to an element's box the way SVG `clipPathUnits="objectBoundingBox"` does, so
+  `shapeOf()` lazily registers one `<clipPath>` def per shape (in a shared hidden `<svg>`) and
+  returns a `ConveyShapeToken` pointing at it via `url(#...)`, usable directly with `applyShape()`.
 - `tokens/color.ts` — `ConveyColor`: the same reference hex palette, plus `cssVariables` mapping
   each token to a `--convey-*` custom property and `toCssVariableBlock()` for generating a
   `:root { }` block from a palette override.
@@ -346,8 +357,9 @@ now the WordNet/VerbNet-backed kinetic-typography layer (`ConveyVerbLexicon`/`Co
 the pure-math force-physics primitives, `<convey-kinetic-text>`/`<convey-kinetic-sentence>`/
 `<convey-svo-scene>`) as a separate `@hereliesaz/convey-web/kinetic` entry point,
 `ConveyType` — this library's official typeface (Azrienoch, a multiplex variable font),
-the from-scratch scroll-linked-animation infrastructure (`scroll-parallax.ts`), and Part XII's
-`<convey-body>` (`kinetic/body.ts`) — 302 tests, `npm run build` and `npm test` both pass
+the from-scratch scroll-linked-animation infrastructure (`scroll-parallax.ts`), Part XII's
+`<convey-body>` (`kinetic/body.ts`), and the real M3 Expressive shape vocabulary
+(`tokens/expressive-shape.ts`) — 309 tests, `npm run build` and `npm test` both pass
 clean, 0 `npm audit` vulnerabilities.
 
 **Not yet done:** nothing from `convey`'s current inventory — every mechanism/enforcement
