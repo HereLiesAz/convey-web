@@ -295,7 +295,12 @@ data — same discipline `convey`'s own Kotlin data follows).
   is load-bearing for the block's own layout, so `body.ts` lives in the `kinetic/` entry point
   as a hard dependency, not the main bundle — matching the async-data reality below: it renders
   plain text immediately, then re-renders once `Promise.all([loadConveyVerbData(),
-  loadConveyNounData()])` resolves.
+  loadConveyNounData()])` resolves. Wired into `demo/index.html`'s `#body` section and actually
+  visually verified: a headless-Chromium screenshot (Playwright's bundled Chromium, no display)
+  of the built demo page shows real per-word weight variation once the kinetic engine finishes
+  loading — heavy-verb-class words ("sprints", "chasing") render bolder than cognition-verb-class
+  words ("considered", "weighing") within the same rendered line, matching the Kotlin sibling's
+  own verified output.
 
 The data-generation pipeline (`scripts/generate-lexicon-data.mjs`) is a from-scratch
 reconstruction of `convey`'s own (undocumented, not-checked-into-that-repo) `codegen.py` --

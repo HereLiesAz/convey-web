@@ -426,6 +426,7 @@
   <a href="#interaction">Interaction</a>
   <a href="#life">Life</a>
   <a href="#kinetic">Kinetic typography</a>
+  <a href="#body">Body block</a>
   <a href="#install">Install</a>
 </nav>
 
@@ -785,6 +786,26 @@
     </div>
   </section>
 
+  <!-- ── Body block ────────────────────────────────────────────────── -->
+  <section class="demo-section" id="body">
+    <div class="section-head">
+      <span class="kicker">Kinetic typography · Part XII</span>
+      <h2>&lt;convey-body&gt; — prose that moves with what it says</h2>
+      <p>
+        Additive, mandatory, and body-scoped rather than heading-scoped: one WordNet+VerbNet
+        classification pass per word drives both idle motion and fluid font weight, and every
+        line performs a scroll-linked entrance keyed to its role — paragraphs slide in
+        horizontally, quotes vertically. <code>&lt;convey-body&gt;</code> brings its own scroll
+        container. Scroll the box below.
+      </p>
+    </div>
+    <div class="demo-box" id="body-demo-box">
+      <div class="label">convey-body</div>
+      <convey-body id="body-demo" style="display:block; height:260px; border-radius:12px; overflow:hidden; background:var(--surface-container);"></convey-body>
+      <div class="note">Plain text renders immediately; classification (and the motion/weight it drives) fills in once the kinetic engine's WordNet/VerbNet data finishes loading above.</div>
+    </div>
+  </section>
+
   <!-- ── Install ───────────────────────────────────────────────────── -->
   <section class="demo-section" id="install">
     <div class="section-head">
@@ -1077,6 +1098,14 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
       })
     }
     updateSvo()
+
+    // convey-body (Part XII)
+    const bodyDemo = document.getElementById('body-demo')
+    bodyDemo.lines = [
+      { text: 'The cheetah sprints across the plain, chasing the fleeing gazelle with relentless speed.', role: 'paragraph' },
+      { text: 'The scientist calmly considered the data, weighing each possibility before she decided.', role: 'paragraph' },
+      { text: 'Speed and grace are not opposites; they are the same motion, seen from two directions.', role: 'quote' },
+    ]
   }
 </script>
 
