@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import '../src/offer.js'
 import '../src/system.js'
 import { ConveyGate } from '../src/escort.js'
+import { ConveyShape } from '../src/tokens/shape.js'
 import type { ConveyOfferElement } from '../src/offer.js'
 import type { ConveyEscortRegistry } from '../src/escort.js'
 import type { ConveyWeightRegistry } from '../src/weight.js'
@@ -130,5 +131,20 @@ describe('convey-offer', () => {
     offer.setAttribute('weight', 'primary')
     system.appendChild(offer)
     expect(system.weightRegistry.primaryCount).toBe(1)
+  })
+
+  it('defaults its shape property to ConveyShape.Medium', () => {
+    document.body.innerHTML = offerHtml('invite')
+    const el = document.querySelector('convey-offer') as ConveyOfferElement
+    expect(el.shape).toBe(ConveyShape.Medium)
+  })
+
+  it('applies a shape set via the shape property to its box clip', () => {
+    document.body.innerHTML = offerHtml('invite')
+    const el = document.querySelector('convey-offer') as ConveyOfferElement
+    el.shape = ConveyShape.Circle
+    expect(el.shape).toBe(ConveyShape.Circle)
+    const box = el.shadowRoot!.querySelector('.box') as HTMLElement
+    expect(box.style.borderRadius).toBe(ConveyShape.Circle.borderRadius)
   })
 })
