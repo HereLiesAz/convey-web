@@ -466,6 +466,20 @@
       <div class="shape-row" id="expressive-shape-row" style="min-height: 56px;"></div>
       <div class="note">Wraps <a href="https://github.com/ruanspies/material-shapes-ts">material-shapes-ts</a>, a faithful port of AndroidX Graphics Shapes — the same geometry <code>convey</code>'s own Kotlin <code>ConveyExpressiveShape</code> ports directly.</div>
     </div>
+    <div class="demo-box" style="margin-bottom: 16px;">
+      <div class="label">The expressive composable gamut — badge, compound badge, tile, morphing offer</div>
+      <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; min-height: 72px;" id="expressive-composable-row">
+        <convey-expressive-badge label="9" shape="cookie9Sided" weight="primary"></convey-expressive-badge>
+        <convey-expressive-compound-badge label="!" shape="sunny" weight="hero"></convey-expressive-compound-badge>
+        <convey-expressive-tile label="Shipment" subtitle="Out for delivery" shape="clamShell" weight="secondary"></convey-expressive-tile>
+        <convey-expressive-offer id="expressive-offer-demo" purpose="Demonstrate a morphing offer" phase="invite" weight="primary" target-width="64px" target-height="64px" target-color="var(--primary-container)" target-content-color="var(--on-primary-container)">
+          <span slot="invite">Go</span>
+          <span slot="progress">...</span>
+          <span slot="success">✓</span>
+        </convey-expressive-offer>
+      </div>
+      <div class="note">Ported from <a href="https://github.com/HereLiesAz/conveyance-expressive">conveyance-expressive</a>'s own <code>Templates.kt</code> (<code>ShapeBadge</code>/<code>CompoundBadge</code>/<code>TitleTile</code>/<code>MorphControl</code>), re-parametrized onto this library's own <code>weight</code>/<code>ConveyColor</code>/<code>&lt;convey-offer&gt;</code> vocabulary. The offer's polygon outline snaps rather than morphs smoothly between phases — CSS cannot interpolate between two different <code>clip-path: url(#...)</code> references — while its color/size still animate through <code>&lt;convey-offer&gt;</code>'s own transitions.</div>
+    </div>
     <div class="demo-box">
       <div class="label">ConveyType — Azrienoch</div>
       <div id="type-specimen" style="font-size: 40px; line-height: 1.2; margin-bottom: 20px; font-family: 'Azrienoch', sans-serif;">Conveyance</div>
@@ -883,6 +897,16 @@ el.style.transitionTimingFunction = springToLinearEasing(ConveyMotion.Snappy)</p
       wrap.appendChild(label)
       expressiveRow.appendChild(wrap)
     }
+  })
+
+  // ── Expressive composable gamut (badge/compound badge/tile/morphing offer) ────
+  const expressiveOfferDemo = document.getElementById('expressive-offer-demo')
+  expressiveOfferDemo.addEventListener('convey-invoke', () => {
+    expressiveOfferDemo.setAttribute('phase', 'progress')
+    setTimeout(() => {
+      expressiveOfferDemo.setAttribute('phase', 'success')
+      setTimeout(() => expressiveOfferDemo.setAttribute('phase', 'invite'), 1200)
+    }, 1200)
   })
 
   // ── Type (Azrienoch) ───────────────────────────────────────────────

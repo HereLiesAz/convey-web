@@ -74,6 +74,16 @@ same enforcement rules, ported vocabulary rather than a fresh design:
   path data to an element's box the way SVG `clipPathUnits="objectBoundingBox"` does, so
   `shapeOf()` lazily registers one `<clipPath>` def per shape (in a shared hidden `<svg>`) and
   returns a `ConveyShapeToken` pointing at it via `url(#...)`, usable directly with `applyShape()`.
+  A `url(#...)` fragment reference does not cross a shadow root boundary — confirmed for real in
+  headless Chromium while wiring `components/expressive-badge.ts`'s shadow-DOM elements to
+  `shapeOf()`'s document-level defs: the clip silently failed to apply, no error, just an
+  unclipped box. `shapeOfIn(shadowRoot, name)` is `shapeOf()`'s shadow-root-scoped counterpart —
+  it registers the same `<clipPath>` def inside the given shadow root instead of the document, so
+  a `clip-path: url(#...)` set on an element inside that same root actually resolves. Any new
+  shadow-DOM component consuming `ConveyExpressiveShape` needs `shapeOfIn()`, not `shapeOf()`.
+- `tokens/expressive-type.ts` — `ConveyExpressiveType`: the web counterpart to convey's own
+  `ConveyExpressiveType.kt` — the real M3 15-step type scale (five roles times three sizes), with
+  the same `step(name)` lookup and h2g2-style aliases, plus `applyExpressiveType(el, textStyle)`.
 - `tokens/color.ts` — `ConveyColor`: the same reference hex palette, plus `cssVariables` mapping
   each token to a `--convey-*` custom property and `toCssVariableBlock()` for generating a
   `:root { }` block from a palette override.
@@ -159,6 +169,23 @@ bit-for-bit from the same Kotlin source:
   rather than being replaced for on/off.
 - `top-bar.ts` — `<convey-top-bar>`: thin structural chrome (leading/title/actions slots); the
   title region registers into the nearest `ConveyWeightRegistry`, defaulting to `primary`.
+- `expressive-badge.ts` — `<convey-expressive-badge>`/`<convey-expressive-compound-badge>`/
+  `<convey-expressive-tile>`: web ports of `conveyance-expressive`'s own `Templates.kt`
+  composable gamut (`ShapeBadge`/`CompoundBadge`/`TitleTile`), re-parametrized onto this
+  library's `weight`/`ConveyColor` vocabulary rather than that library's `rank`/`ExpressiveRole`
+  strings or its `ComposableRequest` object — the same re-parametrization convey's own Kotlin
+  `ConveyExpressiveBadge.kt` applies. `accentWeightFor()` is the compound badge's 3-cycle
+  (hero→primary→secondary→hero) picking the accent shape's container color, ported unchanged
+  from the Kotlin side's identically-named function.
+- `expressive-offer.ts` — `<convey-expressive-offer>`: a plain subclass of `ConveyOfferElement`
+  (a distinct registered tag, not a customized built-in) that sets the inherited `shape`
+  property to a different `ConveyExpressiveShape` per `phase` (`rest-shape`/`busy-shape`/
+  `resolved-shape` attributes) — the web port of `ConveyExpressiveOffer.kt`, itself
+  `conveyance-expressive`'s `MorphControl` template re-mapped onto `ConveyOfferPhase`. The shape
+  change is always a discrete swap, never a smooth interpolation — CSS cannot animate between two
+  different `clip-path: url(#...)` references at all (a stricter ceiling than `ConveyMorphController`'s
+  own documented gap, which at least covers same-shaped `clip-path: polygon(...)` pairs);
+  `<convey-offer>`'s own color/size still animate normally through its existing transitions.
 
 `<convey-list-item>`/`<convey-card>`/`<convey-top-bar>` register themselves (not a wrapped child)
 into the nearest ancestor registry via `nearestWeightRegistry()` (exported from `weight.ts`),
@@ -193,7 +220,10 @@ sources:
   gate-blocked invocation, interruptible progress, and all five phases rendering from one
   element via named slots, into the one thing product code actually reaches for. Implements the
   behavior directly rather than first porting `ConveyStateHost`/`ConveyConstruct` as separate
-  primitives — those exist in Kotlin mainly for internal code reuse.
+  primitives — those exist in Kotlin mainly for internal code reuse. Its `.box` clip shape is a
+  public `shape` JS property (`ConveyShapeToken`, default `ConveyShape.Medium`) — mirroring
+  `ConveyOffer`'s own `targetShape` parameter on the Kotlin side, which this element was missing
+  entirely until `components/expressive-offer.ts` needed it as a real consumer.
 - `enter.ts` — `<convey-origin key="...">`/`<convey-enter key="...">`: Law 2 continuity for
   navigation — a destination grows from the origin element's last recorded bounds (a scale/
   translate transform), instead of appearing from nowhere. Same honest caveat as the Kotlin
@@ -358,8 +388,10 @@ the pure-math force-physics primitives, `<convey-kinetic-text>`/`<convey-kinetic
 `<convey-svo-scene>`) as a separate `@hereliesaz/convey-web/kinetic` entry point,
 `ConveyType` — this library's official typeface (Azrienoch, a multiplex variable font),
 the from-scratch scroll-linked-animation infrastructure (`scroll-parallax.ts`), Part XII's
-`<convey-body>` (`kinetic/body.ts`), and the real M3 Expressive shape vocabulary
-(`tokens/expressive-shape.ts`) — 309 tests, `npm run build` and `npm test` both pass
+`<convey-body>` (`kinetic/body.ts`), the real M3 Expressive shape vocabulary
+(`tokens/expressive-shape.ts`) and type scale (`tokens/expressive-type.ts`), and the rest of
+`conveyance-expressive`'s own composable gamut (`components/expressive-badge.ts`,
+`components/expressive-offer.ts`) — 331 tests, `npm run build` and `npm test` both pass
 clean, 0 `npm audit` vulnerabilities.
 
 **Not yet done:** nothing from `convey`'s current inventory — every mechanism/enforcement

@@ -16,6 +16,9 @@ export type { ConveyShapeToken } from './tokens/shape.js'
 
 export { ConveyExpressiveShape } from './tokens/expressive-shape.js'
 
+export { ConveyExpressiveType, step as expressiveTypeStep, applyExpressiveType } from './tokens/expressive-type.js'
+export type { ConveyExpressiveTextStyle } from './tokens/expressive-type.js'
+
 export { ConveyColor, cssVariables, toCssVariableBlock, containerFor, contentFor } from './tokens/color.js'
 
 export { ConveySize } from './tokens/size.js'
@@ -119,3 +122,11 @@ export type {
 export { ConveySegmentedControlElement } from './components/segmented-control.js'
 export { ConveyTopBarElement } from './components/top-bar.js'
 export { ConveyNavigationBarElement } from './components/navigation-bar.js'
+
+export {
+  ConveyExpressiveBadgeElement,
+  ConveyExpressiveCompoundBadgeElement,
+  ConveyExpressiveTileElement,
+  accentWeightFor,
+} from './components/expressive-badge.js'
+export { ConveyExpressiveOfferElement } from './components/expressive-offer.js'

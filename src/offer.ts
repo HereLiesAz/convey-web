@@ -65,6 +65,7 @@ export class ConveyOfferElement extends HTMLElement {
   #box: HTMLElement
   #gate: ConveyGate | null = null
   #weightRegistry: ConveyWeightRegistry | undefined
+  #shape: ConveyShapeToken = ConveyShape.Medium
 
   constructor() {
     super()
@@ -124,6 +125,23 @@ export class ConveyOfferElement extends HTMLElement {
     this.#gate = value
   }
 
+  /**
+   * The clip shape applied to the offer's own box — a JS property (not an attribute) since a
+   * `ConveyShapeToken` isn't a primitive, same reasoning as `gate`. Defaults to
+   * `ConveyShape.Medium`, matching this element's own prior fixed behavior. Mirrors
+   * `ConveyOffer`'s `targetShape` parameter on the Kotlin side, which this element's shape was
+   * missing entirely until now — `<convey-expressive-offer>` (`components/expressive-offer.ts`)
+   * is the first real consumer, swapping this per `phase`.
+   */
+  get shape(): ConveyShapeToken {
+    return this.#shape
+  }
+
+  set shape(value: ConveyShapeToken) {
+    this.#shape = value
+    if (this.isConnected) applyShape(this.#box, value)
+  }
+
   #weight(): ConveyWeight {
     return (this.getAttribute('weight') as ConveyWeight | null) ?? 'secondary'
   }
@@ -159,8 +177,7 @@ export class ConveyOfferElement extends HTMLElement {
   }
 
   #applyStyle(animate: boolean): void {
-    const shape: ConveyShapeToken = ConveyShape.Medium
-    applyShape(this.#box, shape)
+    applyShape(this.#box, this.#shape)
 
     const targetColor = this.getAttribute('target-color')
     const targetContentColor = this.getAttribute('target-content-color')
