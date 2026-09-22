@@ -15,19 +15,26 @@ async function flush(): Promise<void> {
 
 describe('accentWeightFor', () => {
   it('cycles through three distinct weights', () => {
-    expect(accentWeightFor('hero')).toBe('primary')
+    expect(accentWeightFor('heroic')).toBe('primary')
     expect(accentWeightFor('primary')).toBe('secondary')
-    expect(accentWeightFor('secondary')).toBe('hero')
+    expect(accentWeightFor('secondary')).toBe('heroic')
   })
 
   it('never matches its own input', () => {
-    for (const weight of ['hero', 'primary', 'secondary', 'ghost'] as const) {
+    for (const weight of [
+      'heroic',
+      'primary',
+      'secondary',
+      'tertiary',
+      'supporting',
+    ] as const) {
       expect(accentWeightFor(weight)).not.toBe(weight)
     }
   })
 
-  it('gives ghost a hero fallback', () => {
-    expect(accentWeightFor('ghost')).toBe('hero')
+  it('gives the two quiet levels a heroic fallback', () => {
+    expect(accentWeightFor('tertiary')).toBe('heroic')
+    expect(accentWeightFor('supporting')).toBe('heroic')
   })
 })
 
@@ -53,7 +60,7 @@ describe('convey-expressive-badge', () => {
 
 describe('convey-expressive-compound-badge', () => {
   it('renders primary and accent shapes with different colors', async () => {
-    document.body.innerHTML = `<convey-expressive-compound-badge label="!" shape="sunny" weight="hero"></convey-expressive-compound-badge>`
+    document.body.innerHTML = `<convey-expressive-compound-badge label="!" shape="sunny" weight="heroic"></convey-expressive-compound-badge>`
     const el = document.querySelector('convey-expressive-compound-badge') as ConveyExpressiveCompoundBadgeElement
     await flush()
     const primary = el.shadowRoot!.querySelector('.primary') as HTMLElement

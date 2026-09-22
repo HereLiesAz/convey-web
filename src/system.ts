@@ -15,7 +15,7 @@ import { ConveyOriginRegistry, provideOriginRegistry } from './enter.js'
  *
  * ```html
  * <convey-system>
- *   <convey-weight weight="hero"><button>Send</button></convey-weight>
+ *   <convey-weight weight="heroic"><button>Send</button></convey-weight>
  * </convey-system>
  * ```
  *
@@ -38,7 +38,6 @@ export class ConveySystemElement extends HTMLElement {
   constructor() {
     super()
     this.#weightRegistry = new ConveyWeightRegistry({
-      maxPrimary: this.#intAttribute('max-primary', 3),
       enforce: this.getAttribute('enforce') !== 'false',
     })
     this.#escortRegistry = new ConveyEscortRegistry()
@@ -70,13 +69,6 @@ export class ConveySystemElement extends HTMLElement {
 
   set grammar(value: ConveyGrammar) {
     this.#grammar = value
-  }
-
-  #intAttribute(name: string, fallback: number): number {
-    const raw = this.getAttribute(name)
-    if (raw === null) return fallback
-    const parsed = Number.parseInt(raw, 10)
-    return Number.isFinite(parsed) ? parsed : fallback
   }
 }
 

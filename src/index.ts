@@ -30,6 +30,8 @@ export {
   ConveyWeightRegistry,
   ConveyViolationError,
   ConveyWeightElement,
+  ConveyWeightLadder,
+  demoteConveyWeight,
   provideWeightRegistry,
   nearestWeightRegistry,
 } from './weight.js'

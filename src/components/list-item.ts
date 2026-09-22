@@ -18,8 +18,8 @@ import { ConveyWeightRegistry, nearestWeightRegistry, type ConveyWeight } from '
  * ```
  *
  * Attributes:
- * - `weight` — this row's position in the visual hierarchy (`hero`/`primary`/`secondary`/
- *   `ghost`, default `secondary`). Registers itself into the nearest ancestor
+ * - `weight` — this row's position in the visual hierarchy (`heroic`/`primary`/`secondary`/
+ *   `tertiary`/`supporting`, default `secondary`). Registers itself into the nearest ancestor
  *   `ConveyWeightRegistry` on connect, the same enforcement `<convey-weight>` provides,
  *   because this component IS the weighted element rather than wrapping one.
  * - `clickable` — presence makes the row dispatch a `convey-click` event on click/Enter/Space.

@@ -105,13 +105,35 @@ same enforcement rules, ported vocabulary rather than a fresh design:
 - `grammar.ts` — `ConveyGrammar`: the meaning→spec vocabulary contract, `ConveyGrammar.Default`
   with the same eight meanings as `ConveyGrammar.kt` (`navigate`/`reveal`/`confirm`/`dismiss`/
   `morph`/`load`/`error`/`delight`), fail-fast `get()` on an undeclared meaning, `audit()`.
-- `weight.ts` — `ConveyWeight` (`'hero' | 'primary' | 'secondary' | 'ghost'`) and
-  `ConveyWeightRegistry`, the same hierarchy enforcement as `ConveyWeightRegistry.kt` (one Hero,
-  `maxPrimary` Primaries, unlimited Secondary/Ghost). Compose enforces this through a
-  `CompositionLocal` a `DisposableEffect` registers into; the web has no composition lifecycle, so
-  this ships both the imperative registry API (for a framework adapter's own `useEffect`/
-  `onMounted`) and a ready-made `<convey-weight weight="hero">` custom element that does the same
-  registration via `connectedCallback`/`disconnectedCallback` for framework-free HTML.
+- `weight.ts` — `ConveyWeight` (`'heroic' | 'primary' | 'secondary' | 'tertiary' |
+  'supporting'`) and `ConveyWeightRegistry`. This is the canonical framework's **five-level
+  Act-emphasis outline** (`CONVEYANCE-FRAMEWORK.md` §11 and Appendix B), not the older
+  four-level `Hero/Primary/Secondary/Ghost` model with a numeric Primary quota. Two real
+  behavioral consequences: (1) **there is no quota on any level except `heroic`** — the old
+  `maxPrimary` option (default 3) and its `ConveyViolationError` are gone, along with
+  `<convey-system>`'s `max-primary` attribute, because the framework removed that invented
+  scarcity budget outright; fifty Primaries is a design smell, not something the library is
+  entitled to crash on. (2) `heroic` is still capped at one, as a *structural singularity*
+  rather than a budget — a title is only a title when it is singular — and a contested heroic
+  slot resolves through the framework's own **hero-of-the-hill demotion ladder**
+  (`heroic → primary → secondary → tertiary → supporting`, floored at `supporting`, exported
+  as `demoteConveyWeight`/`ConveyWeightLadder`). Declarations are never rewritten:
+  `declaredWeight(id)` reports what the developer said, `resolvedWeight(id)` derives the level
+  the current outline can present — the same split as the framework's `act.emphasis` /
+  `resolvedEmphasis()`. The framework reports the conflict through Conscience as
+  `HeroOfTheHill`; this library has no Conscience layer, so with `enforce` on the report is a
+  thrown `ConveyViolationError` (the ladder runs either way, so `resolvedWeight()` stays
+  meaningful for a caller that caught it or turned enforcement off). Dropping the `ghost` tier
+  also removes a real terminology collision: "Ghost" in this codebase now means only the
+  manifesto's destruction-residue concept (`reversal.ts`). An explicitly inert or decorative
+  element is `supporting`. Compose enforces its own version through a `CompositionLocal` a
+  `DisposableEffect` registers into; the web has no composition lifecycle, so this ships both
+  the imperative registry API (for a framework adapter's own `useEffect`/`onMounted`) and a
+  ready-made `<convey-weight weight="heroic">` custom element that does the same registration
+  via `connectedCallback`/`disconnectedCallback` for framework-free HTML. **Parity note:**
+  `convey`'s Kotlin `ConveyWeight.kt` still carries the old four-level enum and `maxPrimary`
+  quota as of this change — the two ports are deliberately out of parity here until the Kotlin
+  side lands the same spec fix, and convey-web is the spec-accurate one.
 - `system.ts` — `ConveySystemElement` (`<convey-system>`): the root that activates enforcement —
   the web port of `ConveyProvider`/`ConveySystem`. A descendant looks up its nearest
   `<convey-system>` ancestor via `closest()`, the DOM's own answer to "ambient current value."
@@ -391,7 +413,7 @@ the from-scratch scroll-linked-animation infrastructure (`scroll-parallax.ts`), 
 `<convey-body>` (`kinetic/body.ts`), the real M3 Expressive shape vocabulary
 (`tokens/expressive-shape.ts`) and type scale (`tokens/expressive-type.ts`), and the rest of
 `conveyance-expressive`'s own composable gamut (`components/expressive-badge.ts`,
-`components/expressive-offer.ts`) — 331 tests, `npm run build` and `npm test` both pass
+`components/expressive-offer.ts`) — 340 tests, `npm run build` and `npm test` both pass
 clean, 0 `npm audit` vulnerabilities.
 
 **Not yet done:** nothing from `convey`'s current inventory — every mechanism/enforcement

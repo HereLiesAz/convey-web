@@ -78,18 +78,22 @@ const ACCENT_OFFSET_PX = PRIMARY_SIZE_PX - ACCENT_SIZE_PX / 2
 const COMPOUND_SIZE_PX = ACCENT_OFFSET_PX + ACCENT_SIZE_PX
 
 /** The weight a compound badge's accent shape borrows its color from -- a true 3-cycle over
- *  hero/primary/secondary, so the accent's resolved container always differs from the
- *  primary's own. Ghost has no distinct container of its own to cycle into, so it shares
- *  hero's slot -- same rule as convey's own `accentWeightFor` in `ConveyExpressiveBadge.kt`. */
+ *  heroic/primary/secondary, so the accent's resolved container always differs from the
+ *  primary's own. The two lowest levels (`tertiary`, `supporting`) are the quiet end of the
+ *  outline and have no loud container of their own worth cycling *into*, so they share
+ *  heroic's slot -- the same shape as convey's own `accentWeightFor` in
+ *  `ConveyExpressiveBadge.kt` (which still cycles the older four-level vocabulary; see
+ *  `weight.ts` for the parity note). */
 export function accentWeightFor(weight: ConveyWeight): ConveyWeight {
   switch (weight) {
-    case 'hero':
+    case 'heroic':
       return 'primary'
     case 'primary':
       return 'secondary'
     case 'secondary':
-    case 'ghost':
-      return 'hero'
+    case 'tertiary':
+    case 'supporting':
+      return 'heroic'
   }
 }
 

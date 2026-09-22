@@ -14,9 +14,11 @@ import { grammarOf } from './system.js'
  * The reversal is located in the world, which is where a person's hand already is — not in a
  * modal before the fact, and not in an orphaned report after it.
  *
- * Not named `ConveyGhost`: `ConveyWeight`'s `'ghost'` already names a different, unrelated
- * concept in this library (a present-but-inert element, explicitly non-interactive). This is
- * the framework's *other* "Ghost" — the reversible residue of a destroyed subject.
+ * Historically not named `ConveyGhost` because the old four-level `ConveyWeight` had a
+ * `'ghost'` tier claiming the word for something unrelated (a present-but-inert element).
+ * The canonical five-level Act-emphasis outline has no `'ghost'` tier at all, so that
+ * collision is gone: "Ghost" now means only this — the reversible residue of a destroyed
+ * subject. The name stays `ConveyReversal` regardless, since it says what it does.
  *
  * ```ts
  * const state = new ConveyReversalState(messages)

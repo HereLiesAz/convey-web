@@ -470,7 +470,7 @@
       <div class="label">The expressive composable gamut — badge, compound badge, tile, morphing offer</div>
       <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; min-height: 72px;" id="expressive-composable-row">
         <convey-expressive-badge label="9" shape="cookie9Sided" weight="primary"></convey-expressive-badge>
-        <convey-expressive-compound-badge label="!" shape="sunny" weight="hero"></convey-expressive-compound-badge>
+        <convey-expressive-compound-badge label="!" shape="sunny" weight="heroic"></convey-expressive-compound-badge>
         <convey-expressive-tile label="Shipment" subtitle="Out for delivery" shape="clamShell" weight="secondary"></convey-expressive-tile>
         <convey-expressive-offer id="expressive-offer-demo" purpose="Demonstrate a morphing offer" phase="invite" weight="primary" target-width="64px" target-height="64px" target-color="var(--primary-container)" target-content-color="var(--on-primary-container)">
           <span slot="invite">Go</span>
@@ -493,21 +493,24 @@
       <span class="kicker">ConveyWeight</span>
       <h2>Visual hierarchy the framework enforces</h2>
       <p>
-        <code>&lt;convey-weight weight="hero"&gt;</code> registers into the nearest
-        <code>&lt;convey-system&gt;</code>. Two Heroes on one surface is a declared violation, not
-        a style preference — the registry throws when the rule is broken.
+        <code>&lt;convey-weight weight="heroic"&gt;</code> registers into the nearest
+        <code>&lt;convey-system&gt;</code>. The framework's five-level Act-emphasis outline —
+        Heroic, Primary, Secondary, Tertiary, Supporting — descends like HTML headings. There is
+        no quota on any level except Heroic, which is a structural singularity: a title is only a
+        title when it is singular.
       </p>
     </div>
     <convey-system>
       <div class="demo-box">
-        <div class="label">One Hero, bounded Primaries, quiet Secondaries and Ghosts</div>
+        <div class="label">One Heroic title, then Primary, Secondary, Tertiary, Supporting</div>
         <div class="stage">
-          <convey-weight weight="hero"><button class="plain-btn primary">Hero</button></convey-weight>
+          <convey-weight weight="heroic"><button class="plain-btn primary">Heroic</button></convey-weight>
           <convey-weight weight="primary"><button class="plain-btn">Primary</button></convey-weight>
           <convey-weight weight="secondary"><button class="plain-btn">Secondary</button></convey-weight>
-          <convey-weight weight="ghost"><button class="plain-btn" style="opacity:.5;">Ghost</button></convey-weight>
+          <convey-weight weight="tertiary"><button class="plain-btn" style="opacity:.75;">Tertiary</button></convey-weight>
+          <convey-weight weight="supporting"><button class="plain-btn" style="opacity:.5;">Supporting</button></convey-weight>
         </div>
-        <div class="note">Adding a second <code>weight="hero"</code> inside this system throws a <code>ConveyViolationError</code> — try it in the console: <code>document.querySelector('convey-system').weightRegistry.register({}, 'hero')</code> after this page registers its own hero above.</div>
+        <div class="note">Fifty Primaries is a design smell, not a crash — the registry no longer polices a Primary budget. A second <code>weight="heroic"</code> still is a violation: try <code>document.querySelector('convey-system').weightRegistry.register({}, 'heroic')</code> in the console. Beyond throwing, the whole visible outline then resolves one rung lower (Heroic&nbsp;→&nbsp;Primary&nbsp;→&nbsp;Secondary&nbsp;→&nbsp;Tertiary&nbsp;→&nbsp;Supporting); read it back with <code>weightRegistry.resolvedWeight(el)</code>, which never rewrites what you declared.</div>
       </div>
     </convey-system>
   </section>
