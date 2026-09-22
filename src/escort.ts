@@ -145,7 +145,7 @@ export class ConveyGateLocationElement extends HTMLElement {
  *
  * Slotted content stays visually identical either way — an escorted control stays visually
  * alive, never greyed out, because a genuinely dead control and a gated one are different
- * things (see `ConveyWeight`'s `'ghost'` for the former).
+ * things (see `ConveyWeight`'s `'supporting'` for the former).
  */
 export class ConveyEscortedElement extends HTMLElement {
   #shadow: ShadowRoot

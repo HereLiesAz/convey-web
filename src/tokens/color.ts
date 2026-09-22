@@ -136,34 +136,39 @@ export function toCssVariableBlock(palette: Readonly<Record<keyof typeof ConveyC
 /**
  * The container color appropriate for an element of the given `ConveyWeight`.
  *
- * Hero and Primary elements use `Primary` and `PrimaryContainer`.
- * Secondary elements use `SecondaryContainer`.
- * Ghost elements use `SurfaceContainer`.
+ * Heroic and Primary Acts use `Primary` and `PrimaryContainer`.
+ * Secondary Acts use `SecondaryContainer`, Tertiary `TertiaryContainer`.
+ * Supporting elements — the demotion floor, including anything explicitly inert or
+ * decorative — use `SurfaceContainer`.
  *
  * This is a starting point. Your product will override this mapping.
  */
 export function containerFor(weight: ConveyWeight): string {
   switch (weight) {
-    case 'hero':
+    case 'heroic':
       return ConveyColor.Primary
     case 'primary':
       return ConveyColor.PrimaryContainer
     case 'secondary':
       return ConveyColor.SecondaryContainer
-    case 'ghost':
+    case 'tertiary':
+      return ConveyColor.TertiaryContainer
+    case 'supporting':
       return ConveyColor.SurfaceContainer
   }
 }
 
 export function contentFor(weight: ConveyWeight): string {
   switch (weight) {
-    case 'hero':
+    case 'heroic':
       return ConveyColor.OnPrimary
     case 'primary':
       return ConveyColor.OnPrimaryContainer
     case 'secondary':
       return ConveyColor.OnSecondaryContainer
-    case 'ghost':
+    case 'tertiary':
+      return ConveyColor.OnTertiaryContainer
+    case 'supporting':
       return ConveyColor.OnSurfaceVariant
   }
 }

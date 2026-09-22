@@ -45,16 +45,16 @@ describe('convey-list-item', () => {
       weightRegistry: import('../src/weight.js').ConveyWeightRegistry
     }
     const item = document.createElement('convey-list-item')
-    item.setAttribute('weight', 'hero')
+    item.setAttribute('weight', 'heroic')
     system.appendChild(item)
 
-    expect(system.weightRegistry.heroCount).toBe(1)
+    expect(system.weightRegistry.heroicCount).toBe(1)
 
     item.remove()
-    expect(system.weightRegistry.heroCount).toBe(0)
+    expect(system.weightRegistry.heroicCount).toBe(0)
   })
 
-  it('reports (not throws through appendChild) when a second hero registers', () => {
+  it('reports (not throws through appendChild) when a second heroic registers', () => {
     // Per the WHATWG custom elements spec, an exception thrown inside a reaction callback
     // (connectedCallback here) is *reported* -- the DOM equivalent of an uncaught error --
     // not propagated to whatever triggered the reaction. appendChild() itself never throws
@@ -65,9 +65,9 @@ describe('convey-list-item', () => {
       weightRegistry: import('../src/weight.js').ConveyWeightRegistry
     }
     const a = document.createElement('convey-list-item')
-    a.setAttribute('weight', 'hero')
+    a.setAttribute('weight', 'heroic')
     const b = document.createElement('convey-list-item')
-    b.setAttribute('weight', 'hero')
+    b.setAttribute('weight', 'heroic')
 
     let reported: Error | undefined
     const onError = (e: ErrorEvent) => {
@@ -87,7 +87,7 @@ describe('convey-list-item', () => {
     expect(reported).toBeInstanceOf(ConveyViolationError)
     // The registration still happened before validate() threw -- the throw is advisory, not
     // a rollback. This mirrors register()'s own documented order (set, then validate).
-    expect(system.weightRegistry.heroCount).toBe(2)
+    expect(system.weightRegistry.heroicCount).toBe(2)
   })
 
   it('defaults to secondary weight', () => {

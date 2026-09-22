@@ -89,9 +89,9 @@ describe('convey-top-bar', () => {
       weightRegistry: import('../src/weight.js').ConveyWeightRegistry
     }
     const bar = document.createElement('convey-top-bar')
-    bar.setAttribute('title-weight', 'hero')
+    bar.setAttribute('title-weight', 'heroic')
     system.appendChild(bar)
-    expect(system.weightRegistry.heroCount).toBe(1)
+    expect(system.weightRegistry.heroicCount).toBe(1)
     expect(system.weightRegistry.primaryCount).toBe(0)
   })
 })
