@@ -6,7 +6,14 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/HereLiesAz/convey-web"
+    "url": "git+https://github.com/HereLiesAz/convey-web.git"
+  },
+  "homepage": "https://hereliesaz.github.io/convey-web/",
+  "bugs": {
+    "url": "https://github.com/HereLiesAz/convey-web/issues"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "main": "./dist/convey-web.js",
   "module": "./dist/convey-web.js",
@@ -23,14 +30,24 @@
     },
     "./fonts/Azrienoch-VF.woff2": "./fonts/Azrienoch-VF.woff2"
   },
+  "sideEffects": [
+    "./dist/*.js",
+    "*.css"
+  ],
   "files": [
     "dist",
-    "fonts"
+    "fonts",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit && vite build",
     "test": "vitest run",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "material-shapes-ts": "^0.3.0"

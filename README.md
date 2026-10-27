@@ -14,13 +14,13 @@ from [`demo/index.html`](demo/index.html).
 import { ConveyGrammar, ConveyWeightRegistry } from '@hereliesaz/convey-web'
 
 const registry = new ConveyWeightRegistry()
-registry.register(sendButtonId, 'hero')
-registry.register(cancelButtonId, 'hero') // throws: two heroes has no hero
+registry.register(sendButtonId, 'heroic')
+registry.register(cancelButtonId, 'heroic') // throws: a title is only a title when it is singular
 ```
 
 ```html
 <convey-system>
-  <convey-weight weight="hero"><button>Send</button></convey-weight>
+  <convey-weight weight="heroic"><button>Send</button></convey-weight>
 </convey-system>
 ```
 
@@ -34,8 +34,8 @@ first, enforcement first.
 
 - **Motion means something, or it doesn't exist.** `ConveyGrammar` maps a `meaning` string to
   an `AnimationSpec` — `get()` throws on an undeclared meaning, at the call site.
-- **Hierarchy is enforced, not suggested.** `ConveyWeightRegistry` throws if a second `hero`
-  registers, or too many `primary`s do.
+- **Hierarchy is enforced, not suggested.** `ConveyWeightRegistry` throws if a second `heroic`
+  registers (the loser is demoted down the ladder either way). No other level has a quota.
 - **CSS has no spring easing, so this gives it one.** `springToLinearEasing()` samples the same
   damped-harmonic-oscillator model Compose's `spring()` animates and emits a CSS `linear()`
   easing function — spring motion via a declarative `transition`, no per-frame JS.
@@ -44,6 +44,8 @@ first, enforcement first.
 
 ```bash
 npm install @hereliesaz/convey-web
+# or straight from git -- `prepare` builds dist/ on install
+npm install github:HereLiesAz/convey-web#<tag>
 ```
 
 ```ts
