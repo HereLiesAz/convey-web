@@ -429,3 +429,8 @@ diffed synset-by-synset against real `codegen.py` output. See `src/kinetic/data/
 ## License
 
 [Apache License 2.0](LICENSE).
+
+<!-- entire-agent:begin -->
+Read .entire/agent-guide.md for this repository's workflow, source inspection, and verification guidance.
+@.entire/agent-guide.md
+<!-- entire-agent:end -->
